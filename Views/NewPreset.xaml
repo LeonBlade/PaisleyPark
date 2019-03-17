@@ -1,0 +1,34 @@
+﻿<mah:MetroWindow 
+    x:Class="PaisleyPark.Views.NewPreset"
+    x:Name="NewPresetWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:prism="http://prismlibrary.com/"
+    prism:ViewModelLocator.AutoWireViewModel="True"
+    xmlns:p="clr-namespace:PaisleyPark.Common"
+    p:DialogCloser.DialogResult="{Binding Path=DialogResult}"
+    mc:Ignorable="d"
+    Title="Create New Preset" 
+    Height="170" 
+    Width="250" 
+    WindowStyle="ToolWindow" 
+    ResizeMode="NoResize">
+    <Grid>
+        <Label Content="Preset Name" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+        
+        <TextBox Height="23" Margin="10,36,10,0" TextWrapping="Wrap" Text="{Binding Path=PresetName}" VerticalAlignment="Top"/>
+        
+        <CheckBox Content="Use current waymarks" HorizontalAlignment="Left" Margin="10,67,0,0" VerticalAlignment="Top" IsChecked="{Binding Path=UseCurrentWaymarks}" />
+        
+        <Button Content="Cancel" HorizontalAlignment="Left" Margin="10,0,0,10" Width="75" Height="29" VerticalAlignment="Bottom"
+                Command="{Binding Path=CancelCommand, Mode=OneWay}"
+                CommandParameter="{Binding ElementName=NewPresetWindow}" />
+        
+        <Button Content="Create" Margin="0,0,10,10" HorizontalAlignment="Right" Width="75" Height="29" VerticalAlignment="Bottom"
+                Command="{Binding Path=CreateCommand, Mode=OneWay}"
+                CommandParameter="{Binding ElementName=NewPresetWindow}" BorderBrush="#FFB6B6B6" />
+    </Grid>
+</mah:MetroWindow>

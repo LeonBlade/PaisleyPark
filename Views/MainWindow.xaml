@@ -1,0 +1,43 @@
+﻿<mah:MetroWindow 
+    x:Class="PaisleyPark.Views.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:local="clr-namespace:PaisleyPark"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:prism="http://prismlibrary.com/"
+    prism:ViewModelLocator.AutoWireViewModel="True"
+    mc:Ignorable="d"
+    Icon="../paisleypark.ico"
+    Title="Paisley Park" Height="300" Width="300">
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <prism:InvokeCommandAction Command="{Binding Path=ClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <Grid>
+        <ComboBox Margin="10,10,57,0" VerticalAlignment="Top" Height="27" 
+                  ItemsSource="{Binding Path=UserSettings.Presets, UpdateSourceTrigger=PropertyChanged}"
+                  SelectedItem="{Binding Path=CurrentPreset, Mode=OneWayToSource}" Grid.ColumnSpan="2">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Path=Name, FallbackValue=???}" />
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <Button Content="Load" Margin="10,42,10,0" VerticalAlignment="Top" Command="{Binding Path=LoadPresetCommand}" Grid.ColumnSpan="2"/>
+        <StackPanel HorizontalAlignment="Left" Margin="10,85,0,10" Width="200" Grid.ColumnSpan="2">
+            <Label Content="{Binding GameMemory.MapID}"/>
+            <Label Content="{Binding GameMemory.PlayerX, UpdateSourceTrigger=PropertyChanged}" />
+            <Label Content="{Binding GameMemory.PlayerY, UpdateSourceTrigger=PropertyChanged}" />
+            <Label Content="{Binding GameMemory.PlayerZ, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+        <Button Content="..." Margin="0,10,10,0" VerticalAlignment="Top" Command="{Binding Path=ManagePresetsCommand}" HorizontalAlignment="Right" Width="42" Grid.Column="1"/>
+    </Grid>
+
+</mah:MetroWindow>
