@@ -1,5 +1,6 @@
-﻿using Nhaama.FFXIV;
+using Nhaama.FFXIV;
 using Nhaama.Memory;
+using Nhaama.Memory.Native;
 using PaisleyPark.Common;
 using PaisleyPark.Models;
 using PaisleyPark.Views;
@@ -149,7 +150,7 @@ namespace PaisleyPark.ViewModels
 				// Get xiv's base address.
 				var ffxiv_dx11 = GameProcess.BaseProcess.MainModule.BaseAddress;
 				// Get the sleep module base address.
-				var sleep = GameProcess.GetModuleBasedOffset("KERNEL32.DLL", 0x14A30);
+				var sleep = Kernel32.GetProcAddress(Kernel32.GetModuleHandle("KERNEL32.DLL"), "Sleep").ToUInt64();
 				// Waymark function address.
 				// 48 89 6C 24 10 48 89 74 24 18 57 48 83 EC 30 8B EA 49 8B F0 48 8B F9 83 FA 06
 				var waymarkFunc = (ffxiv_dx11 + 0x752720).ToUint64();
