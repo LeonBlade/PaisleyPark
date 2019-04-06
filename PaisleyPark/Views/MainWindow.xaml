@@ -12,7 +12,7 @@
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d"
     Icon="../paisleypark.ico"
-    Title="Paisley Park" Height="300" Width="300">
+    Title="Paisley Park" Height="112" Width="300">
 
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">
@@ -31,12 +31,6 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
         <Button Content="Load" Margin="10,44,10,0" VerticalAlignment="Top" Command="{Binding Path=LoadPresetCommand}"/>
-        <StackPanel HorizontalAlignment="Left" Margin="10,85,0,10" Width="200" Grid.ColumnSpan="2">
-            <Label Content="{Binding GameMemory.MapID}"/>
-            <Label Content="{Binding GameMemory.PlayerX, UpdateSourceTrigger=PropertyChanged}" />
-            <Label Content="{Binding GameMemory.PlayerY, UpdateSourceTrigger=PropertyChanged}" />
-            <Label Content="{Binding GameMemory.PlayerZ, UpdateSourceTrigger=PropertyChanged}" />
-        </StackPanel>
         <Button Content="..." Margin="0,10,10,0" VerticalAlignment="Top" Command="{Binding Path=ManagePresetsCommand}" HorizontalAlignment="Right" Width="42" Grid.Column="1"/>
     </Grid>
 
