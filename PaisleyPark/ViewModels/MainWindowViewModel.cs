@@ -1,4 +1,4 @@
-using Nhaama.FFXIV;
+﻿using Nhaama.FFXIV;
 using Nhaama.Memory;
 using Nhaama.Memory.Native;
 using PaisleyPark.Common;
