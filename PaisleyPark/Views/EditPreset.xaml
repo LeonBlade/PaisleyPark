@@ -18,7 +18,7 @@
 
     <Grid>
         <Button Content="OK" Margin="0,0,10,10" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75"
-                Command="{Binding Path=OKCommand}" CommandParameter="{Binding ElementName=window, Mode=OneWay}" />
+                Command="{Binding Path=OKCommand}" CommandParameter="{Binding ElementName=window, Mode=OneWay}" Height="29" />
         <Label Content="Preset Name" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
         <TextBox Text="{Binding Path=Name, FallbackValue='My Preset'}" Height="23" Margin="10,41,10,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
         <CheckBox Content="Use current waymarks" HorizontalAlignment="Left" Margin="10,72,0,0" VerticalAlignment="Top" IsChecked="{Binding Path=UseCurrentWaymarks}" />
