@@ -12,8 +12,8 @@
     p:DialogCloser.DialogResult="{Binding Path=DialogResult}"
     mc:Ignorable="d"
     Title="Create New Preset" 
-    Height="170" 
-    Width="250" 
+    Height="165" 
+    Width="300" 
     WindowStyle="ToolWindow" 
     ResizeMode="NoResize">
     <Grid>

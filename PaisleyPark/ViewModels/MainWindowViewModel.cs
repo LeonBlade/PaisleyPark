@@ -153,7 +153,7 @@ namespace PaisleyPark.ViewModels
 				var sleep = GameProcess.GetModuleBasedOffset("KERNEL32.DLL", 0x14A30);
 				// Waymark function address.
 				// 48 89 6C 24 10 48 89 74 24 18 57 48 83 EC 30 8B EA 49 8B F0 48 8B F9 83 FA 06
-				var waymarkFunc = (ffxiv_dx11 + 0x7525D0).ToUint64();
+				var waymarkFunc = (ffxiv_dx11 + 0x752720).ToUint64();
 				// Waymark class instance. (?)
 				var waymarkClassPointer = (ffxiv_dx11 + 0x1AE57C0).ToUint64();
 

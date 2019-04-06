@@ -17,6 +17,7 @@ namespace PaisleyPark.ViewModels
 		public NewPresetViewModel()
 		{
 			CreateCommand = new DelegateCommand<Window>(OnCreate);
+			CloseCommand = new DelegateCommand<Window>(OnCancel);
 		}
 
 		/// <summary>

@@ -21,16 +21,16 @@
     </i:Interaction.Triggers>
 
     <Grid>
-        <ComboBox Margin="10,10,57,0" VerticalAlignment="Top" Height="27" 
+        <ComboBox Margin="10,10,57,0" VerticalAlignment="Top" Height="29" 
                   ItemsSource="{Binding Path=UserSettings.Presets, UpdateSourceTrigger=PropertyChanged}"
-                  SelectedItem="{Binding Path=CurrentPreset, Mode=OneWayToSource}" Grid.ColumnSpan="2">
+                  SelectedItem="{Binding Path=CurrentPreset, Mode=OneWayToSource}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Path=Name, FallbackValue=???}" />
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <Button Content="Load" Margin="10,42,10,0" VerticalAlignment="Top" Command="{Binding Path=LoadPresetCommand}" Grid.ColumnSpan="2"/>
+        <Button Content="Load" Margin="10,44,10,0" VerticalAlignment="Top" Command="{Binding Path=LoadPresetCommand}"/>
         <StackPanel HorizontalAlignment="Left" Margin="10,85,0,10" Width="200" Grid.ColumnSpan="2">
             <Label Content="{Binding GameMemory.MapID}"/>
             <Label Content="{Binding GameMemory.PlayerX, UpdateSourceTrigger=PropertyChanged}" />

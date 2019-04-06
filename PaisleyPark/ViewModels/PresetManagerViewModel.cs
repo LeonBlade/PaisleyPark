@@ -103,6 +103,17 @@ namespace PaisleyPark.ViewModels
 			if (win.ShowDialog() == true)
 			{
 				SelectedItem.Name = vm.Name;
+
+				// If we use the current waymarks, set them in our preset.
+				if (vm.UseCurrentWaymarks)
+				{
+					SelectedItem.A = GameMemory.A;
+					SelectedItem.B = GameMemory.B;
+					SelectedItem.C = GameMemory.C;
+					SelectedItem.D = GameMemory.D;
+					SelectedItem.One = GameMemory.One;
+					SelectedItem.Two = GameMemory.Two;
+				}
 			}
 		}
 

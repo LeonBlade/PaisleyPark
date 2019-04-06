@@ -8,6 +8,7 @@ namespace PaisleyPark.ViewModels
 	public class EditPresetViewModel : BindableBase
 	{
 		public string Name { get; set; }
+		public bool UseCurrentWaymarks { get; set; }
 		public ICommand OKCommand { get; private set; }
 		public ICommand CancelCommand { get; private set; }
 		public bool DidOK { get; private set; }

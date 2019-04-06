@@ -10,19 +10,20 @@
     prism:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d"
     Title="Edit Preset" 
-    Height="145" 
+    Height="165" 
     Width="300" 
     WindowStyle="ToolWindow" 
     ResizeMode="NoResize"
     p:DialogCloser.DialogResult="{Binding Path=DialogResult}">
-    
+
     <Grid>
-        <Button Content="OK" Margin="0,0,10,11" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75"
+        <Button Content="OK" Margin="0,0,10,10" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="75"
                 Command="{Binding Path=OKCommand}" CommandParameter="{Binding ElementName=window, Mode=OneWay}" />
         <Label Content="Preset Name" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
         <TextBox Text="{Binding Path=Name, FallbackValue='My Preset'}" Height="23" Margin="10,41,10,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
-        <Button Content="Cancel" HorizontalAlignment="Left" Margin="10,0,0,11" Width="75" Height="20" VerticalAlignment="Bottom"
+        <CheckBox Content="Use current waymarks" HorizontalAlignment="Left" Margin="10,72,0,0" VerticalAlignment="Top" IsChecked="{Binding Path=UseCurrentWaymarks}" />
+        <Button Content="Cancel" HorizontalAlignment="Left" Margin="10,0,0,10" Width="75" Height="29" VerticalAlignment="Bottom"
                 Command="{Binding Path=CancelCommand}" CommandParameter="{Binding ElementName=window, Mode=OneWay}" />
     </Grid>
-    
+
 </mah:MetroWindow>
