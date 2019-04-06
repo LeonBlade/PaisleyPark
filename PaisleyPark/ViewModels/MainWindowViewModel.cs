@@ -197,7 +197,8 @@ namespace PaisleyPark.ViewModels
 			catch (Exception ex)
 			{
 				MessageBox.Show("Something happened while injecting into FINAL FANTASY XIV!", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
-				Console.WriteLine(ex.Message);
+				MessageBox.Show(ex.ToString());
+				Console.WriteLine(ex);
 
 				// Try to deallocate just in case before quitting.
 				GameProcess.Dealloc(_inject);
