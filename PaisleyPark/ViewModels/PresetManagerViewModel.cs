@@ -84,7 +84,8 @@ namespace PaisleyPark.ViewModels
 		private void OnRemovePreset()
 		{
 			if (SelectedItem != null)
-				Presets.Remove(SelectedItem);
+				if (MessageBox.Show("Are you sure you want to delete this preset?", "Paisley Park", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+					Presets.Remove(SelectedItem);
 		}
 
 		/// <summary>
