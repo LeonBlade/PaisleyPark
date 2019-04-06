@@ -37,6 +37,8 @@ namespace PaisleyPark.ViewModels
 		public ICommand ClosingCommand { get; private set; }
 		public ICommand ManagePresetsCommand { get; private set; }
 
+		private const int WaymarkAddr = 0x1AE5960;
+
 		public MainWindowViewModel(IEventAggregator ea)
 		{
 			// Store reference to the event aggregator.
@@ -219,12 +221,12 @@ namespace PaisleyPark.ViewModels
 			var ffxiv = GameProcess.BaseProcess.MainModule.BaseAddress;
 
 			// pointers for waymark positions
-			var wayA = (ffxiv + 0x1AE5960 + 0x00).ToUint64();
-			var wayB = (ffxiv + 0x1AE5960 + 0x20).ToUint64();
-			var wayC = (ffxiv + 0x1AE5960 + 0x40).ToUint64();
-			var wayD = (ffxiv + 0x1AE5960 + 0x60).ToUint64();
-			var wayOne = (ffxiv + 0x1AE5960 + 0x80).ToUint64();
-			var wayTwo = (ffxiv + 0x1AE5960 + 0xA0).ToUint64();
+			var wayA = (ffxiv + WaymarkAddr + 0x00).ToUint64();
+			var wayB = (ffxiv + WaymarkAddr + 0x20).ToUint64();
+			var wayC = (ffxiv + WaymarkAddr + 0x40).ToUint64();
+			var wayD = (ffxiv + WaymarkAddr + 0x60).ToUint64();
+			var wayOne = (ffxiv + WaymarkAddr + 0x80).ToUint64();
+			var wayTwo = (ffxiv + WaymarkAddr + 0xA0).ToUint64();
 
 			// Worker loop runs indefinitely.
 			while (true)
