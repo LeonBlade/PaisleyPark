@@ -14,10 +14,7 @@ namespace PaisleyPark
 	{
 		protected override Window CreateShell() => Container.Resolve<MainWindow>();
 
-		protected override void RegisterTypes(IContainerRegistry containerRegistry)
-		{
-
-		}
+		protected override void RegisterTypes(IContainerRegistry containerRegistry) {}
 
 		protected override void OnStartup(StartupEventArgs e)
 		{
@@ -30,19 +27,8 @@ namespace PaisleyPark
 		{
 			if (e.Exception != null)
 			{
-				using (StreamWriter writer = new StreamWriter("error.log", true))
-				{
-					writer.WriteLine("-----------Start-----------" + DateTime.Now);
-					writer.WriteLine("Error Message: " + e.Exception.Message);
-					writer.WriteLine("Stack Trace: " + e.Exception.StackTrace);
-					if (e.Exception.InnerException != null)
-					{
-						writer.WriteLine("-----------Inner Exception-----------" + DateTime.Now);
-						writer.WriteLine("Inner Exception Message: " + e.Exception.InnerException.Message);
-						writer.WriteLine("Inner Exception Message: " + e.Exception.InnerException.StackTrace);
-					}
-					writer.WriteLine("-----------End-----------" + DateTime.Now);
-				}
+				var logger = NLog.LogManager.GetCurrentClassLogger();
+				logger.Error(e.Exception, "Unhandled Exception");
 			}
 			e.Handled = true;
 		}
