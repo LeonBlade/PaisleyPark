@@ -1,0 +1,24 @@
+﻿<mah:MetroWindow  
+        x:Class="PaisleyPark.Views.Import"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:prism="http://prismlibrary.com/"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        prism:ViewModelLocator.AutoWireViewModel="True"
+        xmlns:p="clr-namespace:PaisleyPark.Common"
+        mc:Ignorable="d"
+        Title="Import JSON" 
+        Height="112" 
+        Width="532"
+        ResizeMode="NoResize"
+        WindowStyle="ToolWindow"
+        p:DialogCloser.DialogResult="{Binding Path=DialogResult}">
+    <Grid>
+        <TextBox Height="23" Margin="10,10,10,0" TextWrapping="Wrap" Text="{Binding Path=ImportText}" VerticalAlignment="Top"/>
+        <Button Content="Import" Margin="0,0,10,10" HorizontalAlignment="Right" Width="75" Height="30" VerticalAlignment="Bottom"
+                Command="{Binding Path=ImportCommand}" CommandParameter="{Binding ElementName=window, Mode=OneWay}"/>
+
+    </Grid>
+</mah:MetroWindow>

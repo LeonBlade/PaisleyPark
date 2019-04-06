@@ -19,6 +19,9 @@ namespace PaisleyPark.ViewModels
 		public ICommand RemoveCommand { get; private set; }
 		public ICommand OKCommand { get; private set; }
 		public ICommand EditCommand { get; private set; }
+		public ICommand ImportCommand { get; private set; }
+		public ICommand ExportCommand { get; private set; }
+
 		public bool DialogResult { get; private set; }
 		private Memory GameMemory;
 		private readonly static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
@@ -32,6 +35,8 @@ namespace PaisleyPark.ViewModels
 			RemoveCommand	= new DelegateCommand(OnRemovePreset);
 			OKCommand		= new DelegateCommand<Window>(OnOK);
 			EditCommand		= new DelegateCommand(OnEdit);
+			ImportCommand	= new DelegateCommand(OnImport);
+			ExportCommand	= new DelegateCommand(OnExport);
 		}
 
 		/// <summary>
@@ -139,6 +144,23 @@ namespace PaisleyPark.ViewModels
 			DialogResult = true;
 			// Close the window.
 			win.Close();
+		}
+
+		private void OnImport()
+		{
+			// Create new import window.
+			var import = new Import();
+			// Get the view model.
+			var vm = import.DataContext as ImportViewModel;
+
+			// Add the imported preset if it came back okay.
+			if (import.ShowDialog() == true && vm.ImportedPreset != null)
+				Presets.Add(vm.ImportedPreset);
+		}
+
+		private void OnExport()
+		{
+
 		}
     }
 }

@@ -96,9 +96,13 @@
     <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\Waymark.cs" />
     <Compile Include="ViewModels\EditPresetViewModel.cs" />
+    <Compile Include="ViewModels\ImportViewModel.cs" />
     <Compile Include="ViewModels\NewPresetViewModel.cs" />
     <Compile Include="ViewModels\PresetManagerViewModel.cs" />
     <Compile Include="ViewModels\UpdateProgressViewModel.cs" />
+    <Compile Include="Views\Import.xaml.cs">
+      <DependentUpon>Import.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\NewPreset.xaml.cs">
       <DependentUpon>NewPreset.xaml</DependentUpon>
     </Compile>
@@ -111,6 +115,10 @@
     <Page Include="Views\EditPreset.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\Import.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
