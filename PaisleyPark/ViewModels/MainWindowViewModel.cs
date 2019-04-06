@@ -6,7 +6,6 @@ using PaisleyPark.Views;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
-using SaintCoinach;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -26,7 +25,7 @@ namespace PaisleyPark.ViewModels
 
 		public Memory GameMemory { get; set; } = new Memory();
 		public Settings UserSettings { get; set; }
-		public ARealmReversed Realm { get; set; }
+		//public ARealmReversed Realm { get; set; }
 		public Preset CurrentPreset { get; set; }
 
 		// Memory addresses for our injection.
@@ -49,7 +48,7 @@ namespace PaisleyPark.ViewModels
 			InitializeNhaama();
 
 			// Initialize SaintCoinach.
-			InitializeSaintCoinach();
+			//InitializeSaintCoinach();
 
 			// TEMP
 
@@ -105,7 +104,7 @@ namespace PaisleyPark.ViewModels
 		/// <summary>
 		/// Initialize Saint Coiniach for use in the application.
 		/// </summary>
-		private void InitializeSaintCoinach()
+		/*private void InitializeSaintCoinach()
 		{
 			// Initialize the Realm based on our game path settings.
 			Realm = new ARealmReversed(UserSettings.GamePath, SaintCoinach.Ex.Language.English);
@@ -131,7 +130,7 @@ namespace PaisleyPark.ViewModels
 					MessageBox.Show("Could not update SaintCoinach!  Map information may not be up to date.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
 				}
 			}
-		}
+		}*/
 
 		/// <summary>
 		/// Injects code into the game.

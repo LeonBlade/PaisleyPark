@@ -14,8 +14,8 @@ namespace PaisleyPark.ViewModels
 	public class UpdateProgressViewModel : BindableBase
     {
 		// ProgressUpdater from SaintCoinach.
-		private readonly ProgressUpdate Update = new ProgressUpdate();
-
+		//private readonly ProgressUpdate Update = new ProgressUpdate();
+		/*
 		// Bindings for the View.
 		public string CurrentStep { get; set; }
 		public string CurrentFile { get; set; }
@@ -39,7 +39,7 @@ namespace PaisleyPark.ViewModels
 		/// Updates realm on its own thread and updates the UI.
 		/// </summary>
 		/// <param name="realm"></param>
-		public void UpdateRealm(SaintCoinach.ARealmReversed realm)
+		/public void UpdateRealm(SaintCoinach.ARealmReversed realm)
 		{
 			// Create a new thread to not block the UI thread.
 			new Thread(new ParameterizedThreadStart(vm =>
@@ -88,5 +88,6 @@ namespace PaisleyPark.ViewModels
 			if (Percentage != 1)
 				e.Cancel = true;
 		}
+		*/
 	}
 }

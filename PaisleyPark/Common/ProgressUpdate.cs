@@ -1,9 +1,9 @@
-﻿using SaintCoinach.Ex.Relational.Update;
+﻿//using SaintCoinach.Ex.Relational.Update;
 using System;
 
 namespace PaisleyPark.Common
 {
-	public class ProgressUpdate : IProgress<UpdateProgress>
+	/*public class ProgressUpdate : IProgress<UpdateProgress>
 	{
 		public event EventHandler<UpdateProgress> UpdateEvent;
 
@@ -11,5 +11,5 @@ namespace PaisleyPark.Common
 		{
 			UpdateEvent.Invoke(this, value);
 		}
-	}
+	}*/
 }
