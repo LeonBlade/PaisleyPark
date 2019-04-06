@@ -1,3 +1,4 @@
+﻿using Newtonsoft.Json;
 using PaisleyPark.Common;
 using PaisleyPark.Models;
 using PaisleyPark.Views;
@@ -162,7 +163,29 @@ namespace PaisleyPark.ViewModels
 
 		private void OnExport()
 		{
+			string cereal = "";
+			try
+			{
+				cereal = JsonConvert.SerializeObject(SelectedItem);
+				Clipboard.SetDataObject(cereal);
+				MessageBox.Show(
+					string.Format("Copied preset \"{0}\" to your clipboard!", SelectedItem.Name),
+					"Paisley Park",
+					MessageBoxButton.OK,
+					MessageBoxImage.Information
+				);
+			}
+			catch (Exception ex)
+			{
+				logger.Error(ex, "Tried to copy serialized object to clipboard.\n---BEGIN---\n{0}\n---END---\n", cereal);
+				MessageBox.Show(
+					"An error occured while trying to copy this preset to your clipboard.",
+					"Paisley Park",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error
+				);
 
+			}
 		}
     }
 }
