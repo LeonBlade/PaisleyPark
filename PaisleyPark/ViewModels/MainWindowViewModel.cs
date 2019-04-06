@@ -1,6 +1,7 @@
 ﻿using Nhaama.FFXIV;
 using Nhaama.Memory;
 using Nhaama.Memory.Native;
+using NLog;
 using PaisleyPark.Common;
 using PaisleyPark.Models;
 using PaisleyPark.Views;
@@ -18,7 +19,7 @@ using System.Windows.Input;
 namespace PaisleyPark.ViewModels
 {
 	public class MainWindowViewModel : BindableBase
-    {
+	{
 		private readonly IEventAggregator _ea;
 		private NhaamaProcess GameProcess { get; set; }
 		private Definitions GameDefinitions { get; set; }
@@ -29,15 +30,21 @@ namespace PaisleyPark.ViewModels
 		//public ARealmReversed Realm { get; set; }
 		public Preset CurrentPreset { get; set; }
 
+#pragma warning disable IDE1006 // Naming Styles
+
 		// Memory addresses for our injection.
 		public ulong _newmem { get; private set; }
 		public ulong _inject { get; private set; }
+
+#pragma warning restore IDE1006 // Naming Styles
 
 		public ICommand LoadPresetCommand { get; private set; }
 		public ICommand ClosingCommand { get; private set; }
 		public ICommand ManagePresetsCommand { get; private set; }
 
 		private const int WaymarkAddr = 0x1AE5960;
+
+		private readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 		public MainWindowViewModel(IEventAggregator ea)
 		{
@@ -80,7 +87,13 @@ namespace PaisleyPark.ViewModels
 			// If there wasn't any process found, can't continue.
 			if (procs.Length == 0)
 			{
-				MessageBox.Show("You're not running FFXIV!  Cannot start until you open the game.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+				MessageBox.Show(
+					"You're not running FFXIV! Cannot start until you open the game.",
+					"Paisley Park",
+					MessageBoxButton.OK,
+					MessageBoxImage.Exclamation
+				);
+				Logger.Error("FFXIV is not running!");
 				Environment.Exit(-1);
 			}
 
@@ -89,9 +102,18 @@ namespace PaisleyPark.ViewModels
 
 			// Enable raising events.
 			GameProcess.BaseProcess.EnableRaisingEvents = true;
+
 			// Listen to some stuff.
-			GameProcess.BaseProcess.Exited += (_, e) => MessageBox.Show("Looks like FINAL FANTASY XIV is no more!  Please restart Paisley Park after you start it up again.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-			GameProcess.BaseProcess.OutputDataReceived += (_, e) => Console.WriteLine(e.Data);
+			GameProcess.BaseProcess.Exited += (_, e) =>
+			{
+				MessageBox.Show(
+					"Looks like FINAL FANTASY XIV is no more! Please restart Paisley Park after you start it up again.",
+					"Paisley Park",
+					MessageBoxButton.OK,
+					MessageBoxImage.Exclamation
+				);
+				Logger.Info("FFXIV Shutdown or Crashed!");
+			};
 
 			// Load in the definitions file.
 			GameDefinitions = new Definitions(GameProcess);
@@ -143,7 +165,13 @@ namespace PaisleyPark.ViewModels
 			// Ensure process is valid.
 			if (GameProcess == null)
 			{
-				MessageBox.Show("FINAL FANTASY XIV is not running or something bad happened!", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+				MessageBox.Show(
+					"FINAL FANTASY XIV is not running or something bad happened!",
+					"Paisley Park",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error
+				);
+				Logger.Error("FFXIV is not running during injection. This should never be seen!");
 				Environment.Exit(-1);
 			}
 
@@ -154,13 +182,21 @@ namespace PaisleyPark.ViewModels
 				// Get the sleep module base address.
 				var sleep = Kernel32.GetProcAddress(Kernel32.GetModuleHandle("KERNEL32.DLL"), "Sleep").ToUInt64();
 				// Waymark function address.
+				// TODO: AoB!
 				// 48 89 6C 24 10 48 89 74 24 18 57 48 83 EC 30 8B EA 49 8B F0 48 8B F9 83 FA 06
 				var waymarkFunc = (ffxiv_dx11 + 0x752720).ToUint64();
 				// Waymark class instance. (?)
 				var waymarkClassPointer = (ffxiv_dx11 + 0x1AE57C0).ToUint64();
 
+				Logger.Debug("FFXIV Base Address:", ffxiv_dx11.ToUint64().AsHex());
+				Logger.Debug("Sleep:", sleep.AsHex());
+				Logger.Debug("Waymark Function:", waymarkFunc.AsHex());
+				Logger.Debug("Waymark Pointer:", waymarkClassPointer.AsHex());
+
 				// Allocate new memory for our function's data.
 				_newmem = GameProcess.Alloc(14, ffxiv_dx11.ToUint64());
+
+				Logger.Info("_newmem:", _newmem.AsHex());
 
 				// Assembly instructions.
 				string asm = string.Format(string.Join("\n", new string[]
@@ -184,14 +220,19 @@ namespace PaisleyPark.ViewModels
 					"ret"
 				}), _newmem.AsHex(), waymarkClassPointer.AsHex(), waymarkFunc.AsHex(), sleep.AsHex());
 
+				Logger.Debug("Assembly to inject:", asm);
+
 				// Get bytes from AsmjitCSharp.
 				var bytes = AsmjitCSharp.Assemble(asm);
+
+				// log bytes as hex
+				Logger.Debug("Bytes:", BitConverter.ToString(bytes).Replace("-", " "));
 
 				// Allocate bytes for our code injection near waymark function.
 				_inject = GameProcess.Alloc((uint)bytes.LongLength, waymarkFunc);
 
-				// Write the injections to log in case of failure.
-				Console.WriteLine("{0} {1}", _inject.AsHex(), _newmem.AsHex());
+				Logger.Info("_inject:", _inject.AsHex());
+
 
 				// Write our injection bytes into the process.
 				GameProcess.WriteBytes(_inject, bytes);
@@ -199,13 +240,12 @@ namespace PaisleyPark.ViewModels
 			catch (Exception ex)
 			{
 				MessageBox.Show("Something happened while injecting into FINAL FANTASY XIV!", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
-				MessageBox.Show(ex.ToString());
-				Console.WriteLine(ex);
-
-				// Try to deallocate just in case before quitting.
-				GameProcess.Dealloc(_inject);
-				GameProcess.Dealloc(_newmem);
-
+				Logger.Error(
+					ex,
+					"Injection Failed",
+					string.Format("newmem: {0}, inject: {1}", _newmem.AsHex(), _inject.AsHex())
+				);
+				OnClose();
 				Environment.Exit(-1);
 			}
 		}
@@ -272,7 +312,7 @@ namespace PaisleyPark.ViewModels
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine(ex.Message);
+					Logger.Error(ex, "Exception while reading game memory.", WaymarkAddr.ToString("X4"));
 				}
 
 				// Sleep for 100ms before next loop.
@@ -288,7 +328,14 @@ namespace PaisleyPark.ViewModels
 			// Ensure that our injection and newmem addresses are set.
 			if (_inject == 0 || _newmem == 0)
 			{
-				MessageBox.Show("Code is not injected for placing waymarks!", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+				MessageBox.Show(
+					"Code is not injected for placing waymarks!",
+					"Paisley Park",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error
+				);
+				Logger.Error("Injection somehow failed yet wasn't caught by an earlier error. You should not see this!");
+				OnClose();
 				Environment.Exit(-1);
 			}
 
@@ -300,7 +347,12 @@ namespace PaisleyPark.ViewModels
 			if (GameMemory.PlayerX == 0 && GameMemory.PlayerY == 0 && GameMemory.PlayerZ == 0)
 			{
 				// Ask the user if they want to still place based on the XYZ being all 0.
-				var result = MessageBox.Show("It appears you haven't loaded into the zone yet.  Placing Waymarks in this state will crash the game.  Are you sure you want to do this?", "Paisley Park", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+				var result = MessageBox.Show(
+					"It appears you might not be loaded into a zone yet. Placing Waymarks in this state will crash the game. Are you sure you want to do this?",
+					"Paisley Park",
+					MessageBoxButton.YesNo,
+					MessageBoxImage.Warning
+				);
 
 				// If we didn't say yes then return.
 				if (result != MessageBoxResult.Yes)
@@ -323,18 +375,33 @@ namespace PaisleyPark.ViewModels
 
 				// Create a thread to call our injected function.
 				GameProcess.CreateRemoteThread(new IntPtr((long)_inject));
-				
+
 				// Wait 10 ms
 				Task.Delay(10).Wait();
 			}
 
 			// Calls the waymark function for all our waymarks.
-			WriteWaymark(CurrentPreset.A);
-			WriteWaymark(CurrentPreset.B);
-			WriteWaymark(CurrentPreset.C);
-			WriteWaymark(CurrentPreset.D);
-			WriteWaymark(CurrentPreset.One);
-			WriteWaymark(CurrentPreset.Two);
+			try
+			{
+				WriteWaymark(CurrentPreset.A);
+				WriteWaymark(CurrentPreset.B);
+				WriteWaymark(CurrentPreset.C);
+				WriteWaymark(CurrentPreset.D);
+				WriteWaymark(CurrentPreset.One);
+				WriteWaymark(CurrentPreset.Two);
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(
+					"Something happened while attemping to load your preset!",
+					"Paisley Park",
+					MessageBoxButton.OK,
+					MessageBoxImage.Error
+				);
+				Logger.Error(ex, "An error occured while trying to call remote thread or writing waymarks into memory.");
+				OnClose();
+				Environment.Exit(-1);
+			}
 		}
 
 		/// <summary>
