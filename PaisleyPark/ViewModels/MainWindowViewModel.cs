@@ -1,4 +1,5 @@
-﻿using Nhaama.FFXIV;
+﻿using AutoUpdaterDotNET;
+using Nhaama.FFXIV;
 using Nhaama.Memory;
 using Nhaama.Memory.Native;
 using PaisleyPark.Common;
@@ -51,6 +52,12 @@ namespace PaisleyPark.ViewModels
 			_ea = ea;
 
 			logger.Info("--- PAISLEY PARK START ---");
+			logger.Info("Fetching update.");
+
+			// Fetching the update.
+			AutoUpdater.RunUpdateAsAdmin = true;
+			AutoUpdater.DownloadPath = Environment.CurrentDirectory;
+			AutoUpdater.Start("https://raw.githubusercontent.com/LeonBlade/PaisleyPark/master/Update.xml");
 
 			// Load the settings file.
 			UserSettings = Settings.Load();
