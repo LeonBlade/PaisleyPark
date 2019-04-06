@@ -1,5 +1,4 @@
-﻿using NLog;
-using PaisleyPark.Common;
+﻿using PaisleyPark.Common;
 using PaisleyPark.Models;
 using PaisleyPark.Views;
 using Prism.Commands;
@@ -22,7 +21,7 @@ namespace PaisleyPark.ViewModels
 		public ICommand EditCommand { get; private set; }
 		public bool DialogResult { get; private set; }
 		private Memory GameMemory;
-		private readonly Logger Logger = LogManager.GetCurrentClassLogger();
+		private readonly static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
 		public PresetManagerViewModel(IEventAggregator ea)
 		{
@@ -126,7 +125,7 @@ namespace PaisleyPark.ViewModels
 			catch (Exception ex)
 			{
 				MessageBox.Show("Something happened while editing your preset!", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
-				Logger.Error(ex, "Exception while editing selected item.");
+				logger.Error(ex, "Exception while editing selected item.");
 			}
 		}
 

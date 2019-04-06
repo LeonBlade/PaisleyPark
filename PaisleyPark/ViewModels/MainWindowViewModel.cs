@@ -1,7 +1,6 @@
 ﻿using Nhaama.FFXIV;
 using Nhaama.Memory;
 using Nhaama.Memory.Native;
-using NLog;
 using PaisleyPark.Common;
 using PaisleyPark.Models;
 using PaisleyPark.Views;
@@ -44,12 +43,14 @@ namespace PaisleyPark.ViewModels
 
 		private const int WaymarkAddr = 0x1AE5960;
 
-		private readonly Logger Logger = LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
 		public MainWindowViewModel(IEventAggregator ea)
 		{
 			// Store reference to the event aggregator.
 			_ea = ea;
+
+			logger.Info("--- PAISLEY PARK START ---");
 
 			// Load the settings file.
 			UserSettings = Settings.Load();
@@ -93,7 +94,8 @@ namespace PaisleyPark.ViewModels
 					MessageBoxButton.OK,
 					MessageBoxImage.Exclamation
 				);
-				Logger.Error("FFXIV is not running!");
+				logger.Error("FFXIV is not running!");
+				NLog.LogManager.Shutdown();
 				Environment.Exit(-1);
 			}
 
@@ -112,7 +114,7 @@ namespace PaisleyPark.ViewModels
 					MessageBoxButton.OK,
 					MessageBoxImage.Exclamation
 				);
-				Logger.Info("FFXIV Shutdown or Crashed!");
+				logger.Info("FFXIV Shutdown or Crashed!");
 			};
 
 			// Load in the definitions file.
@@ -171,7 +173,7 @@ namespace PaisleyPark.ViewModels
 					MessageBoxButton.OK,
 					MessageBoxImage.Error
 				);
-				Logger.Error("FFXIV is not running during injection. This should never be seen!");
+				logger.Error("FFXIV is not running during injection. This should never be seen!");
 				Environment.Exit(-1);
 			}
 
@@ -188,15 +190,15 @@ namespace PaisleyPark.ViewModels
 				// Waymark class instance. (?)
 				var waymarkClassPointer = (ffxiv_dx11 + 0x1AE57C0).ToUint64();
 
-				Logger.Debug("FFXIV Base Address:", ffxiv_dx11.ToUint64().AsHex());
-				Logger.Debug("Sleep:", sleep.AsHex());
-				Logger.Debug("Waymark Function:", waymarkFunc.AsHex());
-				Logger.Debug("Waymark Pointer:", waymarkClassPointer.AsHex());
+				logger.Debug("FFXIV Base Address: {0}", ffxiv_dx11.ToUint64().AsHex());
+				logger.Debug("Sleep: {0}", sleep.AsHex());
+				logger.Debug("Waymark Function: {0}", waymarkFunc.AsHex());
+				logger.Debug("Waymark Pointer: {0}", waymarkClassPointer.AsHex());
 
 				// Allocate new memory for our function's data.
 				_newmem = GameProcess.Alloc(14, ffxiv_dx11.ToUint64());
 
-				Logger.Info("_newmem:", _newmem.AsHex());
+				logger.Info("_newmem: {0}", _newmem.AsHex());
 
 				// Assembly instructions.
 				string asm = string.Format(string.Join("\n", new string[]
@@ -214,24 +216,24 @@ namespace PaisleyPark.ViewModels
 					"lea rcx, [rax]",
 					"mov rax, {2}",			// waymark function (ffxiv_dx11.exe+752360)
 					"call rax",
-					"push 10",
-					"mov rax, {3}",
+					"push 10",				// 10 ms
+					"mov rax, {3}",			// sleep function
 					"call rax",
 					"ret"
 				}), _newmem.AsHex(), waymarkClassPointer.AsHex(), waymarkFunc.AsHex(), sleep.AsHex());
 
-				Logger.Debug("Assembly to inject:", asm);
+				logger.Debug("Assembly to inject:\n{0}", asm);
 
 				// Get bytes from AsmjitCSharp.
 				var bytes = AsmjitCSharp.Assemble(asm);
 
 				// log bytes as hex
-				Logger.Debug("Bytes:", BitConverter.ToString(bytes).Replace("-", " "));
+				logger.Debug("Bytes: {0}", BitConverter.ToString(bytes).Replace("-", " "));
 
 				// Allocate bytes for our code injection near waymark function.
 				_inject = GameProcess.Alloc((uint)bytes.LongLength, waymarkFunc);
 
-				Logger.Info("_inject:", _inject.AsHex());
+				logger.Info("_inject: {0}", _inject.AsHex());
 
 
 				// Write our injection bytes into the process.
@@ -240,10 +242,11 @@ namespace PaisleyPark.ViewModels
 			catch (Exception ex)
 			{
 				MessageBox.Show("Something happened while injecting into FINAL FANTASY XIV!", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
-				Logger.Error(
+				logger.Error(
 					ex,
-					"Injection Failed",
-					string.Format("newmem: {0}, inject: {1}", _newmem.AsHex(), _inject.AsHex())
+					"Injection Failed! newmem: {0}, inject: {1}",
+					_newmem.AsHex(), 
+					_inject.AsHex()
 				);
 				OnClose();
 				Environment.Exit(-1);
@@ -312,7 +315,7 @@ namespace PaisleyPark.ViewModels
 				}
 				catch (Exception ex)
 				{
-					Logger.Error(ex, "Exception while reading game memory.", WaymarkAddr.ToString("X4"));
+					logger.Error(ex, "Exception while reading game memory. Waymark Address: {0}", WaymarkAddr.ToString("X4"));
 				}
 
 				// Sleep for 100ms before next loop.
@@ -334,7 +337,7 @@ namespace PaisleyPark.ViewModels
 					MessageBoxButton.OK,
 					MessageBoxImage.Error
 				);
-				Logger.Error("Injection somehow failed yet wasn't caught by an earlier error. You should not see this!");
+				logger.Error("Injection somehow failed yet wasn't caught by an earlier error. You should not see this!");
 				OnClose();
 				Environment.Exit(-1);
 			}
@@ -398,7 +401,7 @@ namespace PaisleyPark.ViewModels
 					MessageBoxButton.OK,
 					MessageBoxImage.Error
 				);
-				Logger.Error(ex, "An error occured while trying to call remote thread or writing waymarks into memory.");
+				logger.Error(ex, "An error occured while trying to call remote thread or writing waymarks into memory.");
 				OnClose();
 				Environment.Exit(-1);
 			}
@@ -438,6 +441,8 @@ namespace PaisleyPark.ViewModels
 				GameProcess.Dealloc(_inject);
 			if (_newmem != 0)
 				GameProcess.Dealloc(_newmem);
+
+			NLog.LogManager.Shutdown();
 		}
 	}
 }

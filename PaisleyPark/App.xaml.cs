@@ -1,7 +1,5 @@
 ﻿using PaisleyPark.Views;
 using Prism.Ioc;
-using System;
-using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -14,7 +12,9 @@ namespace PaisleyPark
 	{
 		protected override Window CreateShell() => Container.Resolve<MainWindow>();
 
-		protected override void RegisterTypes(IContainerRegistry containerRegistry) {}
+		protected override void RegisterTypes(IContainerRegistry containerRegistry) { }
+
+		private readonly static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
 		protected override void OnStartup(StartupEventArgs e)
 		{
@@ -23,11 +23,16 @@ namespace PaisleyPark
 			base.OnStartup(e);
 		}
 
+		protected override void OnExit(ExitEventArgs e)
+		{
+			NLog.LogManager.Shutdown();
+			base.OnExit(e);
+		}
+
 		private void Application_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
 		{
 			if (e.Exception != null)
 			{
-				var logger = NLog.LogManager.GetCurrentClassLogger();
 				logger.Error(e.Exception, "Unhandled Exception");
 			}
 			e.Handled = true;
