@@ -1,4 +1,4 @@
-﻿using PaisleyPark.Common;
+using PaisleyPark.Common;
 using PaisleyPark.Models;
 using PaisleyPark.Views;
 using Prism.Commands;
@@ -75,6 +75,7 @@ namespace PaisleyPark.ViewModels
 					p.D = GameMemory.D;
 					p.One = GameMemory.One;
 					p.Two = GameMemory.Two;
+					p.MapID = GameMemory.MapID;
 				}
 
 				// Add the preset.
@@ -124,6 +125,7 @@ namespace PaisleyPark.ViewModels
 						SelectedItem.D = GameMemory.D;
 						SelectedItem.One = GameMemory.One;
 						SelectedItem.Two = GameMemory.Two;
+						SelectedItem.MapID = GameMemory.MapID;
 					}
 				}
 			}
