@@ -33,7 +33,7 @@ namespace PaisleyPark.ViewModels
 				ImportedPreset = JsonConvert.DeserializeObject<Preset>(ImportText);
 
 				// Checking validity purely by the name being specified. Could use a more robust check but this is good enough.
-				if (ImportedPreset.Name == string.Empty)
+				if (ImportedPreset.Name == null || ImportedPreset.Name.Trim() == string.Empty)
 				{
 					MessageBox.Show("This does not resemble a valid preset. Could not import successfully.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
 					return;
