@@ -103,7 +103,7 @@ namespace PaisleyPark.ViewModels
 				);
 				logger.Error("FFXIV is not running!");
 				NLog.LogManager.Shutdown();
-				Environment.Exit(-1);
+				Application.Current.Shutdown();
 			}
 
 			// Get the Nhaama process from the first process that matches for XIV.
@@ -181,7 +181,7 @@ namespace PaisleyPark.ViewModels
 					MessageBoxImage.Error
 				);
 				logger.Error("FFXIV is not running during injection. This should never be seen!");
-				Environment.Exit(-1);
+				Application.Current.Shutdown();
 			}
 
 			try
@@ -256,7 +256,7 @@ namespace PaisleyPark.ViewModels
 					_inject.AsHex()
 				);
 				OnClose();
-				Environment.Exit(-1);
+				Application.Current.Shutdown();
 			}
 		}
 
@@ -346,7 +346,7 @@ namespace PaisleyPark.ViewModels
 				);
 				logger.Error("Injection somehow failed yet wasn't caught by an earlier error. You should not see this!");
 				OnClose();
-				Environment.Exit(-1);
+				Application.Current.Shutdown();
 			}
 
 			// Ensure we have a preset selected.
@@ -410,7 +410,7 @@ namespace PaisleyPark.ViewModels
 				);
 				logger.Error(ex, "An error occured while trying to call remote thread or writing waymarks into memory.");
 				OnClose();
-				Environment.Exit(-1);
+				Application.Current.Shutdown();
 			}
 		}
 
