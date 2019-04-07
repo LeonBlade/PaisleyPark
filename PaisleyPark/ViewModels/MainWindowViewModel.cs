@@ -1,4 +1,4 @@
-using AutoUpdaterDotNET;
+﻿using AutoUpdaterDotNET;
 using Nhaama.FFXIV;
 using Nhaama.Memory;
 using Nhaama.Memory.Native;
@@ -29,6 +29,8 @@ namespace PaisleyPark.ViewModels
 		public Settings UserSettings { get; set; }
 		public Preset CurrentPreset { get; set; }
 		public string WindowTitle { get; set; }
+
+        private Thread WaymarkThread;
 
 #pragma warning disable IDE1006 // Naming Styles
 
@@ -379,12 +381,23 @@ namespace PaisleyPark.ViewModels
 			// Calls the waymark function for all our waymarks.
 			try
 			{
-				WriteWaymark(CurrentPreset.A);
-				WriteWaymark(CurrentPreset.B);
-				WriteWaymark(CurrentPreset.C);
-				WriteWaymark(CurrentPreset.D);
-				WriteWaymark(CurrentPreset.One);
-				WriteWaymark(CurrentPreset.Two);
+                if (WaymarkThread != null && WaymarkThread.IsAlive)
+                {
+                    MessageBox.Show("Please wait for the previous Load to finish.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                WaymarkThread = new Thread(() =>
+                {
+                    WriteWaymark(CurrentPreset.A);
+                    WriteWaymark(CurrentPreset.B);
+                    WriteWaymark(CurrentPreset.C);
+                    WriteWaymark(CurrentPreset.D);
+                    WriteWaymark(CurrentPreset.One);
+                    WriteWaymark(CurrentPreset.Two);
+                });
+
+                WaymarkThread.Start();
 			}
 			catch (Exception ex)
 			{
