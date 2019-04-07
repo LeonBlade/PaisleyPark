@@ -12,7 +12,7 @@
         SizeToContent="Height"
         Title="Edit Preset"
         ResizeMode="NoResize"
-        WindowStyle="ToolWindow"
+        WindowStyle="SingleBorderWindow"
         Height="165" 
         Width="300">
     <StackPanel Margin="10">
@@ -22,7 +22,7 @@
         <DockPanel>
             <Button Content="Cancel" Padding="20,2" 
                     Command="{Binding Path=CancelCommand, Mode=OneWay}" CommandParameter="{Binding ElementName=window, Mode=OneWay}" />
-            <Button Content="Edit" HorizontalAlignment="Right" Padding="20,2" 
+            <Button Content="OK" HorizontalAlignment="Right" Padding="20,2" 
                     Command="{Binding Path=OKCommand, Mode=OneWay}" CommandParameter="{Binding ElementName=window, Mode=OneWay}" />
         </DockPanel>
     </StackPanel>
