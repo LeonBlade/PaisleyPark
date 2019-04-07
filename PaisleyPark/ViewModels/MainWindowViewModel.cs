@@ -1,4 +1,4 @@
-using AutoUpdaterDotNET;
+﻿using AutoUpdaterDotNET;
 using Nhaama.FFXIV;
 using Nhaama.Memory;
 using Nhaama.Memory.Native;
@@ -57,15 +57,13 @@ namespace PaisleyPark.ViewModels
 			logger.Info("--- PAISLEY PARK START ---");
 			logger.Info("Fetching update.");
 
-			// Fetching the update.
-			AutoUpdater.RunUpdateAsAdmin = true;
-			AutoUpdater.DownloadPath = Environment.CurrentDirectory;
-			AutoUpdater.Start("https://raw.githubusercontent.com/LeonBlade/PaisleyPark/master/Update.xml");
+            // Fetch an update.
+            FetchUpdate();      
 
             // Get the version from the assembly.
             var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
 			// Set window title.
-			WindowTitle = string.Format("Paisley Park v{0}.{1}.{2}", version.Major.ToString(), version.Minor.ToString(), version.Build.ToString());
+			WindowTitle = string.Format("Paisley Park {0}", version.VersionString());
 
 			// Load the settings file.
 			UserSettings = Settings.Load();
@@ -85,6 +83,65 @@ namespace PaisleyPark.ViewModels
             // Listen for property changed.
             UserSettings.PropertyChanged += OnPropertyChanged;
 		}
+
+        /// <summary>
+        /// Fetch an update for the applicaton.
+        /// </summary>
+        /// <returns>True if update was found.</returns>
+        private void FetchUpdate()
+        {
+            logger.Info("Fetching update.");
+
+            // Fetching the update.
+            AutoUpdater.RunUpdateAsAdmin = true;
+            AutoUpdater.DownloadPath = Environment.CurrentDirectory;
+            AutoUpdater.Start("https://raw.githubusercontent.com/LeonBlade/PaisleyPark/master/Update.xml");
+
+
+            AutoUpdater.CheckForUpdateEvent += e =>
+            {
+                // Ignore invalid args.
+                if (e == null)
+                    return;
+
+                if (e.IsUpdateAvailable)
+                {
+                    var updateResponse = MessageBox.Show(
+                        $@"Paisley Park {e.CurrentVersion.VersionString()} is available. You're using {e.InstalledVersion.VersionString()}. Would you like to update?",
+                        "Paisley Park",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Exclamation
+                    );
+
+                    // We want to update.
+                    if (updateResponse == MessageBoxResult.Yes)
+                    {
+                        try
+                        {
+                            // Download the update.
+                            if (AutoUpdater.DownloadUpdate())
+                            {
+                                // Remove our memory just in case.
+                                OnClose();
+                                // Shut down the application.
+                                Application.Current.Shutdown();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(
+                                "An error occured while attempting to update. Please try again or download the update manually.",
+                                "Paisley Park",
+                                MessageBoxButton.OK, 
+                                MessageBoxImage.Error
+                            );
+
+                            logger.Error(ex, "Update failed.");
+                        }
+                    }
+                }
+            };
+        }
         
         /// <summary>
         /// User Settings changed.
