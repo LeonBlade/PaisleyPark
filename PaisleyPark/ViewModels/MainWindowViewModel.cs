@@ -40,9 +40,10 @@ namespace PaisleyPark.ViewModels
 
 #pragma warning restore IDE1006 // Naming Styles
 
-		public ICommand LoadPresetCommand { get; private set; }
-		public ICommand ClosingCommand { get; private set; }
-		public ICommand ManagePresetsCommand { get; private set; }
+        public ICommand ManagePreset            { get; private set; }
+        public ICommand LoadPresetCommand       { get; private set; }
+        public ICommand ManagePresetsCommand    { get; private set; }
+		public ICommand ClosingCommand          { get; private set; }
 
 		private const int WaymarkAddr = 0x1AE5960;
 
@@ -82,12 +83,30 @@ namespace PaisleyPark.ViewModels
 			LoadPresetCommand = new DelegateCommand(LoadPreset);
 			ClosingCommand = new DelegateCommand(OnClose);
 			ManagePresetsCommand = new DelegateCommand(OnManagePresets);
-		}
 
-		/// <summary>
-		/// Initialize Nhaama for use in the application.
-		/// </summary>
-		private void InitializeNhaama()
+            // Listen for property changed.
+            UserSettings.PropertyChanged += OnPropertyChanged;
+		}
+        
+        /// <summary>
+        /// User Settings changed.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            // When placement delay is updated from the UI.
+            if (e.PropertyName == "PlacementDelay")
+            {
+                // Save the settings file.
+                Settings.Save(UserSettings);
+            }
+        }
+
+        /// <summary>
+        /// Initialize Nhaama for use in the application.
+        /// </summary>
+        private void InitializeNhaama()
 		{
 			// Get the processes of XIV.
 			var procs = Process.GetProcessesByName("ffxiv_dx11");
@@ -219,11 +238,11 @@ namespace PaisleyPark.ViewModels
 					"jz skip",
 					"lea r8, [rax]",		// waypoint x,y,z coordinates
 				"skip:",
-					"mov rax, {1}",			// waymark class pointer (ffxiv_dx11.exe+1AE57C0)
+					"mov rax, {1}",			// waymark class pointer
 					"lea rcx, [rax]",
-					"mov rax, {2}",			// waymark function (ffxiv_dx11.exe+752360)
+					"mov rax, {2}",			// waymark function
 					"call rax",
-					"push 10",				// 10 ms
+					"push 100",				// 100 ms
 					"mov rax, {3}",			// sleep function
 					"call rax",
 					"ret"
@@ -325,8 +344,8 @@ namespace PaisleyPark.ViewModels
 					logger.Error(ex, "Exception while reading game memory. Waymark Address: {0}", WaymarkAddr.ToString("X4"));
 				}
 
-				// Sleep for 100ms before next loop.
-				Thread.Sleep(10);
+				// Sleep before next loop.
+				Thread.Sleep(100);
 			}
 		}
 
@@ -386,8 +405,11 @@ namespace PaisleyPark.ViewModels
 				// Create a thread to call our injected function.
 				GameProcess.CreateRemoteThread(new IntPtr((long)_inject));
 
-				// Wait 10 ms
-				Task.Delay(10).Wait();
+                // Ensure the delay is at least 10 ms.
+                var delay = UserSettings.PlacementDelay > 10 ? UserSettings.PlacementDelay : 10;
+
+				// Wait a selected number of ms
+				Task.Delay(delay).Wait();
 			}
 
 			// Calls the waymark function for all our waymarks.
