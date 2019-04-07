@@ -27,6 +27,8 @@ namespace PaisleyPark.Models
 		/// </summary>
 		public string GamePath { get; set; }
 
+        public int PlacementDelay { get; set; } = 200;
+
 		/// <summary>
 		/// List of presets to be saved to the file.
 		/// </summary>
