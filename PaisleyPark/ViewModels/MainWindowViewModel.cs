@@ -27,9 +27,7 @@ namespace PaisleyPark.ViewModels
 
 		public Memory GameMemory { get; set; } = new Memory();
 		public Settings UserSettings { get; set; }
-		//public ARealmReversed Realm { get; set; }
 		public Preset CurrentPreset { get; set; }
-
 		public string WindowTitle { get; set; }
 
 #pragma warning disable IDE1006 // Naming Styles
@@ -72,9 +70,6 @@ namespace PaisleyPark.ViewModels
 
 			// Initialize Nhaama.
 			InitializeNhaama();
-
-			// Initialize SaintCoinach.
-			//InitializeSaintCoinach();
 
 			// Inject our code.
 			InjectCode();
@@ -153,37 +148,6 @@ namespace PaisleyPark.ViewModels
 			// Begin the loop.
 			Worker.RunWorkerAsync();
 		}
-
-		/// <summary>
-		/// Initialize Saint Coiniach for use in the application.
-		/// </summary>
-		/*private void InitializeSaintCoinach()
-		{
-			// Initialize the Realm based on our game path settings.
-			Realm = new ARealmReversed(UserSettings.GamePath, SaintCoinach.Ex.Language.English);
-
-			// Check if the game is updated, if not then update the game.
-			if (!Realm.IsCurrentVersion)
-			{
-				try
-				{
-					// Create new window for the Progress Update.
-					var win = new UpdateProgress();
-					// Pull out the ViewModel from the DataContext.
-					var vm = win.DataContext as UpdateProgressViewModel;
-
-					// Call the Realm's update function.
-					vm.UpdateRealm(Realm);
-
-					// Show the new window.
-					win.ShowDialog();
-				}
-				catch (Exception)
-				{
-					MessageBox.Show("Could not update SaintCoinach!  Map information may not be up to date.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
-				}
-			}
-		}*/
 
 		/// <summary>
 		/// Injects code into the game.
