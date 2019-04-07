@@ -11,7 +11,6 @@ namespace PaisleyPark.ViewModels
 		public bool UseCurrentWaymarks { get; set; }
 		public ICommand OKCommand { get; private set; }
 		public ICommand CancelCommand { get; private set; }
-		public bool DidOK { get; private set; }
 		public bool? DialogResult { get; set; } = false;
 
 		public EditPresetViewModel()
