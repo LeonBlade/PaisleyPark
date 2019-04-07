@@ -12,12 +12,12 @@ namespace PaisleyPark.ViewModels
 		public bool DialogResult { get; private set; }
 
 		public ICommand CreateCommand { get; private set; }
-		public ICommand CloseCommand { get; private set; }
+		public ICommand CancelCommand { get; private set; }
 
 		public NewPresetViewModel()
 		{
 			CreateCommand = new DelegateCommand<Window>(OnCreate);
-			CloseCommand = new DelegateCommand<Window>(OnCancel);
+            CancelCommand = new DelegateCommand<Window>(OnCancel);
 		}
 
 		/// <summary>
