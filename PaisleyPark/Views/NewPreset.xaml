@@ -12,21 +12,18 @@
         Title="Create New Preset" 
         Height="155" 
         Width="300" 
-        WindowStyle="ToolWindow" 
+        WindowStyle="ToolWindow"
+        SizeToContent="Height"
         ResizeMode="NoResize">
-    <Grid>
-        <Label Content="Preset Name" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
-        
-        <TextBox Height="23" Margin="10,36,10,0" TextWrapping="Wrap" Text="{Binding Path=PresetName}" VerticalAlignment="Top"/>
-        
-        <CheckBox Content="Use current waymarks" HorizontalAlignment="Left" Margin="10,67,0,0" VerticalAlignment="Top" IsChecked="{Binding Path=UseCurrentWaymarks}" />
-        
-        <Button Content="Cancel" HorizontalAlignment="Left" Margin="10,0,0,10" Width="75" VerticalAlignment="Bottom"
-                Command="{Binding Path=CancelCommand, Mode=OneWay}"
-                CommandParameter="{Binding ElementName=NewPresetWindow}" />
-        
-        <Button Content="Create" Margin="0,0,10,10" HorizontalAlignment="Right" Width="75" VerticalAlignment="Bottom"
-                Command="{Binding Path=CreateCommand, Mode=OneWay}"
-                CommandParameter="{Binding ElementName=NewPresetWindow}" BorderBrush="#FFB6B6B6" />
-    </Grid>
+    <StackPanel Margin="10">
+        <Label Content="Name" FontWeight="Bold"/>
+        <TextBox Text="{Binding Path=Name}" Padding="0,2" />
+        <CheckBox Content="Use current waymarks" IsChecked="{Binding Path=UseCurrentWaymarks}" Margin="0,10,0,10" />
+        <DockPanel>
+            <Button Content="Cancel" HorizontalAlignment="Left" Padding="20,2"
+                    Command="{Binding Path=CancelCommand, Mode=OneWay}" CommandParameter="{Binding ElementName=NewPresetWindow, Mode=OneWay}" />
+            <Button Content="Create" HorizontalAlignment="Right" Padding="20,2"
+                    Command="{Binding Path=CreateCommand, Mode=OneWay}" CommandParameter="{Binding ElementName=NewPresetWindow, Mode=OneWay}" />
+        </DockPanel>
+    </StackPanel>
 </Window>

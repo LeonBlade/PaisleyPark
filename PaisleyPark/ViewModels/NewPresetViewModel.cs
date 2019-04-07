@@ -7,12 +7,12 @@ namespace PaisleyPark.ViewModels
 {
 	public class NewPresetViewModel : BindableBase
     {
-		public string PresetName { get; set; }
-		public bool UseCurrentWaymarks { get; set; } = true;
-		public bool DialogResult { get; private set; }
+		public string Name              { get; set; }
+		public bool UseCurrentWaymarks  { get; set; } = true;
+		public bool? DialogResult       { get; private set; }
 
-		public ICommand CreateCommand { get; private set; }
-		public ICommand CancelCommand { get; private set; }
+		public ICommand CreateCommand   { get; private set; }
+		public ICommand CancelCommand   { get; private set; }
 
 		public NewPresetViewModel()
 		{

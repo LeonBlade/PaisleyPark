@@ -65,7 +65,7 @@ namespace PaisleyPark.ViewModels
 			if (win.ShowDialog() == true)
 			{
 				// Initialize the creation of our preset with the preset name.
-				var p = new Preset() { Name = vm.PresetName };
+				var p = new Preset() { Name = vm.Name };
 
 				// If we use the current waymarks, set them in our preset.
 				if (vm.UseCurrentWaymarks)
