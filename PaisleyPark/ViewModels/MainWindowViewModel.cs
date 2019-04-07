@@ -30,6 +30,8 @@ namespace PaisleyPark.ViewModels
 		//public ARealmReversed Realm { get; set; }
 		public Preset CurrentPreset { get; set; }
 
+		public string WindowTitle { get; set; }
+
 #pragma warning disable IDE1006 // Naming Styles
 
 		// Memory addresses for our injection.
@@ -59,6 +61,11 @@ namespace PaisleyPark.ViewModels
 			AutoUpdater.DownloadPath = Environment.CurrentDirectory;
 			AutoUpdater.Start("https://raw.githubusercontent.com/LeonBlade/PaisleyPark/master/Update.xml");
 
+			// Get the version from the assembly.
+			var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+			// Set window title.
+			WindowTitle = string.Format("Paisley Park v{0}.{1}.{2}", version.Major.ToString(), version.Minor.ToString(), version.Build.ToString());
+
 			// Load the settings file.
 			UserSettings = Settings.Load();
 
@@ -67,13 +74,6 @@ namespace PaisleyPark.ViewModels
 
 			// Initialize SaintCoinach.
 			//InitializeSaintCoinach();
-
-			// TEMP
-
-			//GameProcess.Dealloc(0x7FF7997A0000);
-			//GameProcess.Dealloc(0x7FF7997B0000);
-
-			// TEMP
 
 			// Inject our code.
 			InjectCode();
