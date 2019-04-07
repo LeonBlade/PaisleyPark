@@ -90,6 +90,7 @@
     </ApplicationDefinition>
     <Compile Include="Common\ExtensionMethods.cs" />
     <Compile Include="Common\GameMemoryUpdateEvent.cs" />
+    <Compile Include="Common\NumericTextBox.cs" />
     <Compile Include="Common\ProgressUpdate.cs" />
     <Compile Include="Models\Memory.cs" />
     <Compile Include="Models\Preset.cs" />
