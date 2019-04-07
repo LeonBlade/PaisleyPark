@@ -12,7 +12,7 @@
         Title="Create New Preset" 
         Height="155" 
         Width="300" 
-        WindowStyle="ToolWindow"
+        WindowStyle="SingleBorderWindow"
         SizeToContent="Height"
         ResizeMode="NoResize">
     <StackPanel Margin="10">

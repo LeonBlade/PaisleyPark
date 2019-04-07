@@ -12,7 +12,7 @@
         Title="Preset Manager" 
         Height="373" 
         Width="340" 
-        WindowStyle="ToolWindow">
+        WindowStyle="SingleBorderWindow">
 
     <Grid>
         <ListBox Margin="10,10,84,35" ItemsSource="{Binding Path=Presets}" SelectedItem="{Binding Path=SelectedItem}" BorderBrush="#FFCCCCCC" BorderThickness="1">

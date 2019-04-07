@@ -11,7 +11,7 @@
         Height="88" 
         Width="546"
         ResizeMode="NoResize"
-        WindowStyle="ToolWindow"
+        WindowStyle="SingleBorderWindow"
         SizeToContent="WidthAndHeight"
         p:DialogCloser.DialogResult="{Binding Path=DialogResult}">
     <StackPanel Margin="10" Orientation="Horizontal">
