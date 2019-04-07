@@ -17,12 +17,12 @@
         Width="300">
     <StackPanel Margin="10">
         <Label Content="Name" FontWeight="Bold" />
-        <TextBox Text="{Binding Path=Name}" />
+        <TextBox Text="{Binding Path=Name}" Padding="0,2" />
         <CheckBox Content="Use current waymarks" IsChecked="{Binding Path=UseCurrentWaymarks}" Margin="0,10,0,10" />
         <DockPanel>
-            <Button Content="Cancel" Padding="20,5" 
+            <Button Content="Cancel" Padding="20,2" 
                     Command="{Binding Path=CancelCommand, Mode=OneWay}" CommandParameter="{Binding ElementName=window, Mode=OneWay}" />
-            <Button Content="Edit" HorizontalAlignment="Right" Padding="20,5" 
+            <Button Content="Edit" HorizontalAlignment="Right" Padding="20,2" 
                     Command="{Binding Path=OKCommand, Mode=OneWay}" CommandParameter="{Binding ElementName=window, Mode=OneWay}" />
         </DockPanel>
     </StackPanel>
