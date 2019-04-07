@@ -7,16 +7,17 @@
         prism:ViewModelLocator.AutoWireViewModel="True"
         xmlns:p="clr-namespace:PaisleyPark.Common"
         mc:Ignorable="d"
-        Title="Import JSON" 
-        Height="98" 
-        Width="532"
+        Title="Import Preset" 
+        Height="88" 
+        Width="546"
         ResizeMode="NoResize"
         WindowStyle="ToolWindow"
+        SizeToContent="WidthAndHeight"
         p:DialogCloser.DialogResult="{Binding Path=DialogResult}">
-    <Grid>
-        <TextBox Height="23" Margin="10,10,10,0" TextWrapping="Wrap" Text="{Binding Path=ImportText}" VerticalAlignment="Top"/>
-        <Button Content="Import" Margin="0,0,10,10" HorizontalAlignment="Right" Width="75" VerticalAlignment="Bottom"
+    <StackPanel Margin="10" Orientation="Horizontal">
+        <TextBox TextWrapping="NoWrap" Text="{Binding Path=ImportText}" Width="420" Padding="0,2" VerticalAlignment="Center" HorizontalAlignment="Stretch" ToolTip="Paste in a JSON preset here." />
+        <Button Content="Import" HorizontalAlignment="Right" Padding="20,2" Margin="10,0,0,0" VerticalAlignment="Center"
                 Command="{Binding Path=ImportCommand}" CommandParameter="{Binding ElementName=window, Mode=OneWay}"/>
 
-    </Grid>
+    </StackPanel>
 </Window>
