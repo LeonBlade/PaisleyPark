@@ -62,16 +62,17 @@ namespace PaisleyPark.ViewModels
 			AutoUpdater.DownloadPath = Environment.CurrentDirectory;
 			AutoUpdater.Start("https://raw.githubusercontent.com/LeonBlade/PaisleyPark/master/Update.xml");
 
-			// Get the version from the assembly.
-			var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            // Get the version from the assembly.
+            var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
 			// Set window title.
 			WindowTitle = string.Format("Paisley Park v{0}.{1}.{2}", version.Major.ToString(), version.Minor.ToString(), version.Build.ToString());
 
 			// Load the settings file.
 			UserSettings = Settings.Load();
 
-			// Initialize Nhaama.
-			InitializeNhaama();
+            // Initialize Nhaama.
+            if (!InitializeNhaama())
+                return;
 
 			// Inject our code.
 			InjectCode();
@@ -103,7 +104,7 @@ namespace PaisleyPark.ViewModels
         /// <summary>
         /// Initialize Nhaama for use in the application.
         /// </summary>
-        private void InitializeNhaama()
+        private bool InitializeNhaama()
 		{
 			// Get the processes of XIV.
 			var procs = Process.GetProcessesByName("ffxiv_dx11");
@@ -120,10 +121,40 @@ namespace PaisleyPark.ViewModels
 				logger.Error("FFXIV is not running!");
 				NLog.LogManager.Shutdown();
 				Application.Current.Shutdown();
+
+                // You failed.
+                return false;
 			}
 
-			// Get the Nhaama process from the first process that matches for XIV.
-			GameProcess = procs[0].GetNhaamaProcess();
+            // More than one process!
+            if (procs.Length > 1)
+            {
+                // Create a new process selector window.
+                var ps = new ProcessSelector();
+                // Get the view model.
+                var vm = ps.DataContext as ProcessSelectorViewModel;
+                // Set the process list.
+                vm.ProcessList = new System.Collections.ObjectModel.ObservableCollection<Process>(procs);
+
+                // Show the dialog and if result comes back false we canceled the window.
+                if (ps.ShowDialog() == false || vm.SelectedProcess == null)
+                {
+                    MessageBox.Show("Could not open a process for the game, shutting down.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+                    logger.Info("User didn't select a process.");
+                    Application.Current.Shutdown();
+
+                    // Failed.
+                    return false;
+                }
+
+                // Set the selected process.
+                GameProcess = vm.SelectedProcess.GetNhaamaProcess();
+            }
+            else
+            {
+                // Get the Nhaama process from the first process that matches for XIV.
+                GameProcess = procs[0].GetNhaamaProcess();
+            }
 
 			// Enable raising events.
 			GameProcess.BaseProcess.EnableRaisingEvents = true;
@@ -149,6 +180,9 @@ namespace PaisleyPark.ViewModels
 			Worker.WorkerSupportsCancellation = true;
 			// Begin the loop.
 			Worker.RunWorkerAsync();
+
+            // Success!
+            return true;
 		}
 
 		/// <summary>
@@ -226,7 +260,6 @@ namespace PaisleyPark.ViewModels
 				_inject = GameProcess.Alloc((uint)bytes.LongLength, waymarkFunc);
 
 				logger.Info("_inject: {0}", _inject.AsHex());
-
 
 				// Write our injection bytes into the process.
 				GameProcess.WriteBytes(_inject, bytes);
