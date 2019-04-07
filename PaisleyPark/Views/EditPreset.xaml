@@ -12,7 +12,6 @@
         SizeToContent="Height"
         Title="Edit Preset"
         ResizeMode="NoResize"
-        WindowStyle="SingleBorderWindow"
         Height="165" 
         Width="300">
     <StackPanel Margin="10">

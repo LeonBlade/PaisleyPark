@@ -14,7 +14,7 @@
         SizeToContent="Height"
         Height="200" 
         Width="300"
-        ResizeMode="NoResize">
+        ResizeMode="CanMinimize">
 
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">

@@ -10,9 +10,8 @@
         p:DialogCloser.DialogResult="{Binding Path=DialogResult}"
         mc:Ignorable="d"
         Title="Process Selector" 
-        WindowStyle="SingleBorderWindow"
         SizeToContent="Height"
-        ResizeMode="NoResize"
+        ResizeMode="CanMinimize"
         Height="367.671"
         Width="250">
     <StackPanel Margin="10">
