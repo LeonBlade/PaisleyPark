@@ -1,4 +1,4 @@
-﻿using AutoUpdaterDotNET;
+using AutoUpdaterDotNET;
 using Nhaama.FFXIV;
 using Nhaama.Memory;
 using Nhaama.Memory.Native;
@@ -109,25 +109,8 @@ namespace PaisleyPark.ViewModels
 			// Get the processes of XIV.
 			var procs = Process.GetProcessesByName("ffxiv_dx11");
 
-			// If there wasn't any process found, can't continue.
-			if (procs.Length == 0)
-			{
-				MessageBox.Show(
-					"You're not running FFXIV! Cannot start until you open the game.",
-					"Paisley Park",
-					MessageBoxButton.OK,
-					MessageBoxImage.Exclamation
-				);
-				logger.Error("FFXIV is not running!");
-				NLog.LogManager.Shutdown();
-				Application.Current.Shutdown();
-
-                // You failed.
-                return false;
-			}
-
             // More than one process!
-            if (procs.Length > 1)
+            if (procs.Length > 1 || procs.Length == 0)
             {
                 // Create a new process selector window.
                 var ps = new ProcessSelector();
