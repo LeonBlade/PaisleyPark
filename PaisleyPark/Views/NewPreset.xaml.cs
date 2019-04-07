@@ -1,11 +1,11 @@
-﻿using MahApps.Metro.Controls;
+﻿using System.Windows;
 
 namespace PaisleyPark.Views
 {
 	/// <summary>
 	/// Interaction logic for NewPreset.xaml
 	/// </summary>
-	public partial class NewPreset : MetroWindow
+	public partial class NewPreset : Window
 	{
 		public NewPreset()
 		{

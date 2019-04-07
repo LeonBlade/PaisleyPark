@@ -19,7 +19,6 @@ namespace PaisleyPark
 		protected override void OnStartup(StartupEventArgs e)
 		{
 			Current.DispatcherUnhandledException += Application_DispatcherUnhandledException;
-
 			base.OnStartup(e);
 		}
 

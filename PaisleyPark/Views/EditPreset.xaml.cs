@@ -1,11 +1,11 @@
-﻿using MahApps.Metro.Controls;
+﻿using System.Windows;
 
 namespace PaisleyPark.Views
 {
 	/// <summary>
 	/// Interaction logic for EditPreset.xaml
 	/// </summary>
-	public partial class EditPreset : MetroWindow
+	public partial class EditPreset : Window
 	{
 		public EditPreset()
 		{
