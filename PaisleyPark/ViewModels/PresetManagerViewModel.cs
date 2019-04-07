@@ -163,6 +163,9 @@ namespace PaisleyPark.ViewModels
 
 		private void OnExport()
 		{
+			if (SelectedItem == null)
+				return;
+
 			string cereal = "";
 			try
 			{
