@@ -100,6 +100,9 @@
     <Compile Include="ViewModels\NewPresetViewModel.cs" />
     <Compile Include="ViewModels\PresetManagerViewModel.cs" />
     <Compile Include="ViewModels\UpdateProgressViewModel.cs" />
+    <Compile Include="Views\EditPreset.xaml.cs">
+      <DependentUpon>EditPreset.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Import.xaml.cs">
       <DependentUpon>Import.xaml</DependentUpon>
     </Compile>
@@ -113,8 +116,8 @@
       <DependentUpon>UpdateProgress.xaml</DependentUpon>
     </Compile>
     <Page Include="Views\EditPreset.xaml">
-      <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Import.xaml">
       <SubType>Designer</SubType>
@@ -132,9 +135,6 @@
     <Compile Include="Common\CloseProperty.cs" />
     <Compile Include="Common\DialogCloser.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
-    <Compile Include="Views\EditPreset.xaml.cs">
-      <DependentUpon>EditPreset.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

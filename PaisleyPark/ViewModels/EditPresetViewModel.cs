@@ -7,28 +7,41 @@ namespace PaisleyPark.ViewModels
 {
 	public class EditPresetViewModel : BindableBase
 	{
-		public string Name { get; set; }
-		public bool UseCurrentWaymarks { get; set; }
-		public ICommand OKCommand { get; private set; }
-		public ICommand CancelCommand { get; private set; }
-		public bool? DialogResult { get; set; } = false;
+		public string Name              { get; set; }
+		public bool UseCurrentWaymarks  { get; set; }
+        public bool? DialogResult       { get; private set; }
+
+        public ICommand EditCommand     { get; private set; }
+		public ICommand CancelCommand   { get; private set; }
 
 		public EditPresetViewModel()
 		{
-			OKCommand = new DelegateCommand<Window>(OnOK);
+            EditCommand = new DelegateCommand<Window>(OnEdit);
 			CancelCommand = new DelegateCommand<Window>(OnCancel);
 		}
 
-		private void OnOK(Window win)
+        /// <summary>
+		/// When clicking the edit button.
+		/// </summary>
+		/// <param name="window">Window this was called from.</param>
+		private void OnEdit(Window window)
 		{
-			DialogResult = true;
-			win.Close();
-		}
+            // Set DidCreate to true.
+            DialogResult = true;
+            // Close the window.
+            window.Close();
+        }
 
-		private void OnCancel(Window win)
+        /// <summary>
+		/// When clicking cancel button.
+		/// </summary>
+		/// <param name="window">Window this was called from.</param>
+		private void OnCancel(Window window)
 		{
-			DialogResult = false;
-			win.Close();
-		}
+            // Set DidCreate to false.
+            DialogResult = false;
+            // Close the window.
+            window.Close();
+        }
 	}
 }
