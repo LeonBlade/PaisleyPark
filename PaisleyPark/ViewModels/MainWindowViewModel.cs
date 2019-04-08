@@ -1,4 +1,4 @@
-﻿using AutoUpdaterDotNET;
+using AutoUpdaterDotNET;
 using Nhaama.FFXIV;
 using Nhaama.Memory;
 using Nhaama.Memory.Native;
@@ -457,7 +457,7 @@ namespace PaisleyPark.ViewModels
 				var threadHandle = GameProcess.CreateRemoteThread(new IntPtr((long)_inject), out _);
 
                 // Ensure the delay is at least 10 ms.
-                var delay = UserSettings.PlacementDelay > 10 ? UserSettings.PlacementDelay : 10;
+                var delay = Math.Max(UserSettings.PlacementDelay, 10);
 
 				// Wait a selected number of ms
 				Task.Delay(delay).Wait();
