@@ -1,4 +1,4 @@
-using AutoUpdaterDotNET;
+﻿using AutoUpdaterDotNET;
 using Nhaama.FFXIV;
 using Nhaama.Memory;
 using Nhaama.Memory.Native;
@@ -162,39 +162,20 @@ namespace PaisleyPark.ViewModels
         /// Initialize Nhaama for use in the application.
         /// </summary>
         private bool InitializeNhaama()
-		{
-			// Get the processes of XIV.
-			var procs = Process.GetProcessesByName("ffxiv_dx11");
+        {
+            // Get the processes of XIV.
+            var procs = Process.GetProcessesByName("ffxiv_dx11");
 
-            // More than one process!
+            // More than one process.
             if (procs.Length > 1 || procs.Length == 0)
             {
-                // Create a new process selector window.
-                var ps = new ProcessSelector();
-                // Get the view model.
-                var vm = ps.DataContext as ProcessSelectorViewModel;
-                // Set the process list.
-                vm.ProcessList = new System.Collections.ObjectModel.ObservableCollection<Process>(procs);
-
-                // Show the dialog and if result comes back false we canceled the window.
-                if (ps.ShowDialog() == false || vm.SelectedProcess == null)
-                {
-                    MessageBox.Show("Could not open a process for the game, shutting down.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
-                    logger.Info("User didn't select a process.");
-                    Application.Current.Shutdown();
-
-                    // Failed.
+                // Show the process selector window.
+                if (!ShowProcessSelector(procs))
                     return false;
-                }
-
-                // Set the selected process.
-                GameProcess = vm.SelectedProcess.GetNhaamaProcess();
             }
             else
-            {
                 // Get the Nhaama process from the first process that matches for XIV.
                 GameProcess = procs[0].GetNhaamaProcess();
-            }
 
 			// Enable raising events.
 			GameProcess.BaseProcess.EnableRaisingEvents = true;
@@ -224,6 +205,41 @@ namespace PaisleyPark.ViewModels
             // Success!
             return true;
 		}
+
+        /// <summary>
+        /// Show the process selector.
+        /// </summary>
+        private bool ShowProcessSelector(Process[] procs)
+        {
+            // Create a new process selector window.
+            var ps = new ProcessSelector();
+            // Get the view model.
+            var vm = ps.DataContext as ProcessSelectorViewModel;
+            // Set the process list.
+            vm.ProcessList = new System.Collections.ObjectModel.ObservableCollection<Process>(procs);
+
+            // Show the dialog and if result comes back false we canceled the window.
+            if (ps.ShowDialog() == false || vm.SelectedProcess == null)
+            {
+                MessageBox.Show(
+                    "Could not open a process for the game, shutting down.",
+                    "Paisley Park",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+                logger.Info("User didn't select a process.");
+                Application.Current.Shutdown();
+
+                // Failed to select process.
+                return false;
+            }
+
+            // Set the selected process.
+            GameProcess = vm.SelectedProcess.GetNhaamaProcess();
+
+            // We did it.
+            return true;
+        }
 
 		/// <summary>
 		/// Injects code into the game.
