@@ -1,7 +1,9 @@
 ﻿using Prism.Commands;
 using Prism.Mvvm;
+using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 
@@ -13,12 +15,14 @@ namespace PaisleyPark.ViewModels
         public Process SelectedProcess { get; set; }
         public ICommand RefreshCommand { get; private set; }
         public ICommand OKCommand { get; private set; }
+        public ICommand SwitchCommand { get; private set; }
         public bool? DialogResult { get; set; }
 
         public ProcessSelectorViewModel()
         {
             RefreshCommand = new DelegateCommand(OnRefresh);
             OKCommand = new DelegateCommand<Window>(OnOK);
+            SwitchCommand = new DelegateCommand(OnSwitch);
         }
 
         private void OnRefresh()
@@ -29,14 +33,37 @@ namespace PaisleyPark.ViewModels
             ProcessList = new ObservableCollection<Process>(procs);
         }
 
+        /// <summary>
+        /// Switches to the selected process.
+        /// </summary>
+        private void OnSwitch()
+        {
+            // Ensure process is selected.
+            if (SelectedProcess == null)
+                return;
+
+            // Switch to the main window.
+            SwitchToThisWindow(SelectedProcess.MainWindowHandle, false);
+        }
+
+        [DllImport("user32.dll")]
+        public static extern void SwitchToThisWindow(IntPtr hWnd, bool turnon);
+
+        /// <summary>
+        /// When you click OK.
+        /// </summary>
+        /// <param name="window"></param>
         private void OnOK(Window window)
         {
+            // Ensure process is selected.
             if (SelectedProcess == null)
             {
                 MessageBox.Show("Please select a process before clicking OK.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
+            // Successful close.
             DialogResult = true;
+            // Close the window.
             window.Close();
         }
     }
