@@ -27,6 +27,9 @@ namespace PaisleyPark.Models
 		/// </summary>
 		public string GamePath { get; set; }
 
+        /// <summary>
+        /// How long to wait between placing waymarks.
+        /// </summary>
         public int PlacementDelay { get; set; } = 200;
 
 		/// <summary>

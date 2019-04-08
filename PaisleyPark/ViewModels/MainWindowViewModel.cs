@@ -45,6 +45,7 @@ namespace PaisleyPark.ViewModels
         public ICommand ManagePresetsCommand    { get; private set; }
 		public ICommand ClosingCommand          { get; private set; }
 
+        // Waymark offsets.
 		private const int WaymarkAddr = 0x1AE5960;
 
 		private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
