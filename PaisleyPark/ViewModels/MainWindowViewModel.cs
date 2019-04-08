@@ -1,4 +1,4 @@
-﻿using AutoUpdaterDotNET;
+using AutoUpdaterDotNET;
 using Nhaama.FFXIV;
 using Nhaama.Memory;
 using Nhaama.Memory.Native;
@@ -442,13 +442,19 @@ namespace PaisleyPark.ViewModels
 				GameProcess.Write(_newmem + 0xD, (byte)(waymark.Active ? 1 : 0));
 
 				// Create a thread to call our injected function.
-				GameProcess.CreateRemoteThread(new IntPtr((long)_inject));
+				var threadHandle = GameProcess.CreateRemoteThread(new IntPtr((long)_inject), out _);
 
                 // Ensure the delay is at least 10 ms.
                 var delay = UserSettings.PlacementDelay > 10 ? UserSettings.PlacementDelay : 10;
 
 				// Wait a selected number of ms
 				Task.Delay(delay).Wait();
+
+                // Wait for the thread.
+                Kernel32.WaitForSingleObject(threadHandle, unchecked((uint)-1));
+
+                // Close the thread handle.
+                Kernel32.CloseHandle(threadHandle);
 			}
 
 			// Calls the waymark function for all our waymarks.
