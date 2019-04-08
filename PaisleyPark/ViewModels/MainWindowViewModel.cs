@@ -1,4 +1,4 @@
-using AutoUpdaterDotNET;
+﻿using AutoUpdaterDotNET;
 using Nhaama.FFXIV;
 using Nhaama.Memory;
 using Nhaama.Memory.Native;
@@ -247,8 +247,6 @@ namespace PaisleyPark.ViewModels
 			{
 				// Get xiv's base address.
 				var ffxiv_dx11 = GameProcess.BaseProcess.MainModule.BaseAddress;
-				// Get the sleep module base address.
-				var sleep = Kernel32.GetProcAddress(Kernel32.GetModuleHandle("KERNEL32.DLL"), "Sleep").ToUInt64();
 				// Waymark function address.
 				// TODO: AoB!
 				// 48 89 6C 24 10 48 89 74 24 18 57 48 83 EC 30 8B EA 49 8B F0 48 8B F9 83 FA 06
@@ -257,7 +255,6 @@ namespace PaisleyPark.ViewModels
 				var waymarkClassPointer = (ffxiv_dx11 + 0x1AE57C0).ToUint64();
 
 				logger.Debug("FFXIV Base Address: {0}", ffxiv_dx11.ToUint64().AsHex());
-				logger.Debug("Sleep: {0}", sleep.AsHex());
 				logger.Debug("Waymark Function: {0}", waymarkFunc.AsHex());
 				logger.Debug("Waymark Pointer: {0}", waymarkClassPointer.AsHex());
 
@@ -269,6 +266,7 @@ namespace PaisleyPark.ViewModels
 				// Assembly instructions.
 				string asm = string.Format(string.Join("\n", new string[]
 				{
+                    "sub rsp, 40",          // give room in stack
 					"xor rdx, rdx",			// zero out rdx and r8
 					"xor r8, r8",
 					"mov rax, {0}",			// memory allocated
@@ -282,11 +280,9 @@ namespace PaisleyPark.ViewModels
 					"lea rcx, [rax]",
 					"mov rax, {2}",			// waymark function
 					"call rax",
-					"push 100",				// 100 ms
-					"mov rax, {3}",			// sleep function
-					"call rax",
+                    "add rsp, 40",          // move stack pointer back
 					"ret"
-				}), _newmem.AsHex(), waymarkClassPointer.AsHex(), waymarkFunc.AsHex(), sleep.AsHex());
+				}), _newmem.AsHex(), waymarkClassPointer.AsHex(), waymarkFunc.AsHex());
 
 				logger.Debug("Assembly to inject:\n{0}", asm);
 
