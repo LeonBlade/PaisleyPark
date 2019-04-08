@@ -1,4 +1,4 @@
-﻿using AutoUpdaterDotNET;
+using AutoUpdaterDotNET;
 using Nhaama.FFXIV;
 using Nhaama.Memory;
 using Nhaama.Memory.Native;
@@ -493,11 +493,15 @@ namespace PaisleyPark.ViewModels
 		/// </summary>
 		private void OnManagePresets()
 		{
-			// Create new preset manager window.
-			var win = new PresetManager();
+            // Create new preset manager window.
+            var win = new PresetManager
+            {
+                // Set owner to main window.
+                Owner = Application.Current.MainWindow
+            };
 
-			// Pull view model from window.
-			var vm = win.DataContext as PresetManagerViewModel;
+            // Pull view model from window.
+            var vm = win.DataContext as PresetManagerViewModel;
 
 			// Populate the presets with our current presets as a new instance.
 			vm.Presets = new System.Collections.ObjectModel.ObservableCollection<Preset>(UserSettings.Presets);

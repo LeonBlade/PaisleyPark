@@ -10,6 +10,7 @@
         prism:ViewModelLocator.AutoWireViewModel="True"
         mc:Ignorable="d"
         Title="Preset Manager" 
+        WindowStartupLocation="CenterOwner"
         Height="373" 
         Width="340" 
         ResizeMode="CanMinimize">

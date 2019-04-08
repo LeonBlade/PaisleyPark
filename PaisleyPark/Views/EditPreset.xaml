@@ -12,6 +12,7 @@
         SizeToContent="Height"
         Title="Edit Preset"
         ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
         Height="165" 
         Width="300">
     <StackPanel Margin="10">

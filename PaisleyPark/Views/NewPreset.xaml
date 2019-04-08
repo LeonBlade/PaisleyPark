@@ -9,6 +9,7 @@
         xmlns:p="clr-namespace:PaisleyPark.Common"
         p:DialogCloser.DialogResult="{Binding Path=DialogResult}"
         mc:Ignorable="d"
+        WindowStartupLocation="CenterOwner"
         Title="Create New Preset" 
         Height="155" 
         Width="300" 

@@ -55,8 +55,12 @@ namespace PaisleyPark.ViewModels
 		/// </summary>
 		private void OnAddPreset()
 		{
-			// Create window for add preset.
-			var win = new NewPreset();
+            // Create window for add preset.
+            var win = new NewPreset
+            {
+                // Owner set to MainWindow.
+                Owner = Application.Current.MainWindow
+            };
 
 			// Get the VM for this window.
 			var vm = win.DataContext as NewPresetViewModel;
@@ -108,13 +112,23 @@ namespace PaisleyPark.ViewModels
 				if (SelectedItem == null)
 					return;
 
-				var win = new EditPreset();
-				var vm = win.DataContext as EditPresetViewModel;
+                // Create Edit preset window.
+				var win = new EditPreset
+                {
+                    // Owner set to MainWindow.
+                    Owner = Application.Current.MainWindow
+                };
+
+                // Get the view model.
+                var vm = win.DataContext as EditPresetViewModel;
+
+                // Set the name to the selected name in the preset list.
 				vm.Name = SelectedItem.Name;
 
 				// Dialog comes back as true.
 				if (win.ShowDialog() == true)
 				{
+                    // Set the selected name to the viewmodel's name.
 					SelectedItem.Name = vm.Name;
 
 					// If we use the current waymarks, set them in our preset.
@@ -140,36 +154,50 @@ namespace PaisleyPark.ViewModels
 		/// <summary>
 		/// When you click OK button.
 		/// </summary>
-		/// <param name="win"></param>
-		private void OnOK(Window win)
+		/// <param name="window"></param>
+		private void OnOK(Window window)
 		{
 			// Set that we're saving changes.
 			DialogResult = true;
 			// Close the window.
-			win.Close();
+			window.Close();
 		}
 
+        /// <summary>
+        /// Clicking import button.
+        /// </summary>
 		private void OnImport()
 		{
 			// Create new import window.
-			var import = new Import();
-			// Get the view model.
-			var vm = import.DataContext as ImportViewModel;
+			var import = new Import
+            {
+                // Owner set to MainWindow.
+                Owner = Application.Current.MainWindow
+            };
+
+            // Get the view model.
+            var vm = import.DataContext as ImportViewModel;
 
 			// Add the imported preset if it came back okay.
 			if (import.ShowDialog() == true && vm.ImportedPreset != null)
 				Presets.Add(vm.ImportedPreset);
 		}
 
+        /// <summary>
+        /// Clicking export button.
+        /// </summary>
 		private void OnExport()
 		{
 			if (SelectedItem == null)
 				return;
 
+            // Serialized string initialize.
 			string cereal = "";
 			try
 			{
+                // Serialize the selected item.
 				cereal = JsonConvert.SerializeObject(SelectedItem);
+                // Set in the clipboard (need to use SetDataObject because SetText crashes).
 				Clipboard.SetDataObject(cereal);
 				MessageBox.Show(
 					string.Format("Copied preset \"{0}\" to your clipboard!", SelectedItem.Name),
