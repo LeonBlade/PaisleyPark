@@ -1,4 +1,5 @@
 using AutoUpdaterDotNET;
+using Nancy.Hosting.Self;
 using Nhaama.FFXIV;
 using Nhaama.Memory;
 using Nhaama.Memory.Native;
@@ -20,7 +21,8 @@ namespace PaisleyPark.ViewModels
 {
 	public class MainWindowViewModel : BindableBase
 	{
-		private readonly IEventAggregator _ea;
+		private static IEventAggregator _ea;
+        public static IEventAggregator EventAggregator { get => _ea; }
 		private NhaamaProcess GameProcess { get; set; }
 		private Definitions GameDefinitions { get; set; }
 		private readonly BackgroundWorker Worker = new BackgroundWorker();
@@ -50,6 +52,8 @@ namespace PaisleyPark.ViewModels
 
 		private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
+        private readonly NancyHost Host = new NancyHost(new PaisleyParkBootstrapper(), new Uri("http://localhost:1337"));
+
 		public MainWindowViewModel(IEventAggregator ea)
 		{
 			// Store reference to the event aggregator.
@@ -72,6 +76,27 @@ namespace PaisleyPark.ViewModels
             // Initialize Nhaama.
             if (!InitializeNhaama())
                 return;
+
+            // Start the Nancy Host.
+            try
+            {
+                Host.Start();
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Could not start Nancy host.");
+            }
+
+            // Subscribe to the waymark event from the REST server.
+            _ea.GetEvent<WaymarkEvent>().Subscribe(waymarks =>
+            {
+                WriteWaymark(waymarks.A);
+                WriteWaymark(waymarks.B);
+                WriteWaymark(waymarks.C);
+                WriteWaymark(waymarks.D);
+                WriteWaymark(waymarks.One);
+                WriteWaymark(waymarks.Two);
+            });
 
 			// Inject our code.
 			InjectCode();
@@ -401,10 +426,47 @@ namespace PaisleyPark.ViewModels
 			}
 		}
 
-		/// <summary>
-		/// Loads the preset using our injected function.
-		/// </summary>
-		private void LoadPreset()
+        /// <summary>
+        /// Write a waymark in memory and place it.
+        /// </summary>
+        /// <param name="waymark">Waymark to place.</param>
+        private void WriteWaymark(Waymark waymark)
+        {
+            // Ensure the waymark isn't null.
+            if (waymark == null)
+                return;
+
+            // Write the X, Y and Z coordinates.
+            GameProcess.Write(_newmem, waymark.X);
+            GameProcess.Write(_newmem + 0x4, waymark.Y);
+            GameProcess.Write(_newmem + 0x8, waymark.Z);
+
+            // Write the waymark ID.
+            GameProcess.Write(_newmem + 0xC, (byte)waymark.ID);
+
+            // Write the enable state
+            GameProcess.Write(_newmem + 0xD, (byte)(waymark.Active ? 1 : 0));
+
+            // Create a thread to call our injected function.
+            var threadHandle = GameProcess.CreateRemoteThread(new IntPtr((long)_inject), out _);
+
+            // Ensure the delay is at least 10 ms.
+            var delay = Math.Max(UserSettings.PlacementDelay, 10);
+
+            // Wait a selected number of ms
+            Task.Delay(delay).Wait();
+
+            // Wait for the thread.
+            Kernel32.WaitForSingleObject(threadHandle, unchecked((uint)-1));
+
+            // Close the thread handle.
+            Kernel32.CloseHandle(threadHandle);
+        }
+
+        /// <summary>
+        /// Loads the preset using our injected function.
+        /// </summary>
+        private void LoadPreset()
 		{
 			// Ensure that our injection and newmem addresses are set.
 			if (_inject == 0 || _newmem == 0)
@@ -438,36 +500,6 @@ namespace PaisleyPark.ViewModels
 				// If we didn't say yes then return.
 				if (result != MessageBoxResult.Yes)
 					return;
-			}
-
-			// Create local function to write to the newmem address.
-			void WriteWaymark(Waymark waymark)
-			{
-				// Write the X, Y and Z coordinates.
-				GameProcess.Write(_newmem, waymark.X);
-				GameProcess.Write(_newmem + 0x4, waymark.Y);
-				GameProcess.Write(_newmem + 0x8, waymark.Z);
-
-				// Write the waymark ID.
-				GameProcess.Write(_newmem + 0xC, (byte)waymark.ID);
-
-				// Write the enable state
-				GameProcess.Write(_newmem + 0xD, (byte)(waymark.Active ? 1 : 0));
-
-				// Create a thread to call our injected function.
-				var threadHandle = GameProcess.CreateRemoteThread(new IntPtr((long)_inject), out _);
-
-                // Ensure the delay is at least 10 ms.
-                var delay = Math.Max(UserSettings.PlacementDelay, 10);
-
-				// Wait a selected number of ms
-				Task.Delay(delay).Wait();
-
-                // Wait for the thread.
-                Kernel32.WaitForSingleObject(threadHandle, unchecked((uint)-1));
-
-                // Close the thread handle.
-                Kernel32.CloseHandle(threadHandle);
 			}
 
 			// Calls the waymark function for all our waymarks.
