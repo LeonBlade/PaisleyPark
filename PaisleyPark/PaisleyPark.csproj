@@ -85,7 +85,10 @@
     <Compile Include="Common\ExtensionMethods.cs" />
     <Compile Include="Common\GameMemoryUpdateEvent.cs" />
     <Compile Include="Common\NumericTextBox.cs" />
+    <Compile Include="Common\PaisleyParkBootstrapper.cs" />
     <Compile Include="Common\ProgressUpdate.cs" />
+    <Compile Include="Common\WaymarkEvent.cs" />
+    <Compile Include="Common\WaymarkNancyModule.cs" />
     <Compile Include="Models\Memory.cs" />
     <Compile Include="Models\Preset.cs" />
     <Compile Include="Models\Settings.cs" />
@@ -193,6 +196,12 @@
       <Version>1.5.0.235</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Nancy">
+      <Version>1.4.5</Version>
+    </PackageReference>
+    <PackageReference Include="Nancy.Hosting.Self">
+      <Version>1.4.1</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>12.0.1</Version>
