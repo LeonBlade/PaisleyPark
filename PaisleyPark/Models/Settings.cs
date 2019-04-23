@@ -28,6 +28,11 @@ namespace PaisleyPark.Models
 		public string GamePath { get; set; }
 
         /// <summary>
+        /// Port for HTTP server.
+        /// </summary>
+        public int Port { get; set; }
+
+        /// <summary>
         /// How long to wait between placing waymarks.
         /// </summary>
         public int PlacementDelay { get; set; } = 200;

@@ -84,6 +84,7 @@
     </ApplicationDefinition>
     <Compile Include="Common\ExtensionMethods.cs" />
     <Compile Include="Common\GameMemoryUpdateEvent.cs" />
+    <Compile Include="Common\InverseBooleanConverter.cs" />
     <Compile Include="Common\NumericTextBox.cs" />
     <Compile Include="Common\PaisleyParkBootstrapper.cs" />
     <Compile Include="Common\ProgressUpdate.cs" />

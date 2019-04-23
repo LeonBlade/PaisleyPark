@@ -21,7 +21,7 @@ namespace PaisleyPark.ViewModels
 {
 	public class MainWindowViewModel : BindableBase
 	{
-		private static IEventAggregator _ea;
+        private static IEventAggregator _ea;
         public static IEventAggregator EventAggregator { get => _ea; }
 		private NhaamaProcess GameProcess { get; set; }
 		private Definitions GameDefinitions { get; set; }
@@ -31,6 +31,9 @@ namespace PaisleyPark.ViewModels
 		public Settings UserSettings { get; set; }
 		public Preset CurrentPreset { get; set; }
 		public string WindowTitle { get; set; }
+        private bool _isServerStarted;
+        public bool IsServerStarted { get; set; }
+        public bool IsServerStopped { get => !IsServerStarted; }
 
         private Thread WaymarkThread;
 
@@ -42,17 +45,19 @@ namespace PaisleyPark.ViewModels
 
 #pragma warning restore IDE1006 // Naming Styles
 
-        public ICommand ManagePreset            { get; private set; }
-        public ICommand LoadPresetCommand       { get; private set; }
-        public ICommand ManagePresetsCommand    { get; private set; }
-		public ICommand ClosingCommand          { get; private set; }
+        public DelegateCommand ManagePreset            { get; private set; }
+        public DelegateCommand LoadPresetCommand       { get; private set; }
+        public DelegateCommand ManagePresetsCommand    { get; private set; }
+		public DelegateCommand ClosingCommand          { get; private set; }
+        public DelegateCommand StartServerCommand      { get; private set; }
+        public DelegateCommand StopServerCommand       { get; private set; }
 
         // Waymark offsets.
-		private const int WaymarkAddr = 0x1AE5960;
+        private const int WaymarkAddr = 0x1AE5960;
 
 		private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly NancyHost Host = new NancyHost(new PaisleyParkBootstrapper(), new Uri("http://localhost:1337"));
+        private NancyHost Host;
 
 		public MainWindowViewModel(IEventAggregator ea)
 		{
@@ -77,16 +82,6 @@ namespace PaisleyPark.ViewModels
             if (!InitializeNhaama())
                 return;
 
-            // Start the Nancy Host.
-            try
-            {
-                Host.Start();
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, "Could not start Nancy host.");
-            }
-
             // Subscribe to the waymark event from the REST server.
             _ea.GetEvent<WaymarkEvent>().Subscribe(waymarks =>
             {
@@ -105,6 +100,8 @@ namespace PaisleyPark.ViewModels
 			LoadPresetCommand = new DelegateCommand(LoadPreset);
 			ClosingCommand = new DelegateCommand(OnClose);
 			ManagePresetsCommand = new DelegateCommand(OnManagePresets);
+            StartServerCommand = new DelegateCommand(OnStartServer).ObservesCanExecute(() => IsServerStopped);
+            StopServerCommand = new DelegateCommand(OnStopServer).ObservesCanExecute(() => IsServerStarted);
 
             // Listen for property changed.
             UserSettings.PropertyChanged += OnPropertyChanged;
@@ -177,7 +174,7 @@ namespace PaisleyPark.ViewModels
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             // When placement delay is updated from the UI.
-            if (e.PropertyName == "PlacementDelay")
+            if (e.PropertyName == "PlacementDelay" || e.PropertyName == "Port")
             {
                 // Save the settings file.
                 Settings.Save(UserSettings);
@@ -292,7 +289,7 @@ namespace PaisleyPark.ViewModels
 				// Waymark function address.
 				// TODO: AoB!
 				// 48 89 6C 24 10 48 89 74 24 18 57 48 83 EC 30 8B EA 49 8B F0 48 8B F9 83 FA 06
-				var waymarkFunc = (ffxiv_dx11 + 0x752720).ToUint64();
+				var waymarkFunc = (ffxiv_dx11 + 0x752140).ToUint64();
 				// Waymark class instance. (?)
 				var waymarkClassPointer = (ffxiv_dx11 + 0x1AE57C0).ToUint64();
 
@@ -537,10 +534,50 @@ namespace PaisleyPark.ViewModels
 			}
 		}
 
-		/// <summary>
-		/// Click to manage the presets.
-		/// </summary>
-		private void OnManagePresets()
+        /// <summary>
+        /// Starts the HTTP server.
+        /// </summary>
+        private void OnStartServer()
+        {
+            // Initialize the host.
+            Host = new NancyHost(new PaisleyParkBootstrapper(), new Uri($"http://localhost:{UserSettings.Port.ToString()}"));
+
+            // Start the Nancy Host.
+            try
+            {
+                Host.Start();
+                IsServerStarted = true;
+                StartServerCommand.RaiseCanExecuteChanged();
+                StopServerCommand.RaiseCanExecuteChanged();
+                MessageBox.Show($"HTPP server started on port {UserSettings.Port}!", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Could not start Nancy host.");
+                MessageBox.Show($"Could not start the HTTP server on port {UserSettings.Port}!", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void OnStopServer()
+        {
+            try
+            {
+                Host.Stop();
+                IsServerStarted = false;
+                StartServerCommand.RaiseCanExecuteChanged();
+                StopServerCommand.RaiseCanExecuteChanged();
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Error stopping server.");
+                MessageBox.Show("There was an error stopping the server.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Click to manage the presets.
+        /// </summary>
+        private void OnManagePresets()
 		{
             // Create new preset manager window.
             var win = new PresetManager

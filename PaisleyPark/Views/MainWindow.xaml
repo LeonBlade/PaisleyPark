@@ -22,6 +22,10 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
 
+    <Window.Resources>
+        <p:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+    </Window.Resources>
+
     <StackPanel Margin="10">
 
         <Grid>
@@ -44,11 +48,27 @@
 
         <Button Content="Load" Margin="0,5" Command="{Binding LoadPresetCommand}"/>
 
-        <GroupBox Header="Settings">
+        <GroupBox Header="Settings" Height="78">
             <StackPanel Orientation="Horizontal">
-                <Label Content="Delay" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                <p:NumericTextBox TextWrapping="Wrap" VerticalAlignment="Center" ToolTip="Delay in milliseconds for each waymark to be placed."
-                                  Text="{Binding Path=UserSettings.PlacementDelay, UpdateSourceTrigger=PropertyChanged}" Width="100"/>
+                <StackPanel Orientation="Vertical">
+                    <Label Content="Delay" VerticalAlignment="Center" Margin="0,0,5,0" Height="26"/>
+                    <Label Content="Port" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                </StackPanel>
+                <StackPanel Orientation="Vertical">
+
+                    <StackPanel Height="26" Orientation="Horizontal">
+                        <p:NumericTextBox TextWrapping="Wrap" VerticalAlignment="Center" ToolTip="Delay in milliseconds for each waymark to be placed."
+                                      Text="{Binding Path=UserSettings.PlacementDelay, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
+                    </StackPanel>
+
+                    <StackPanel Height="26" Orientation="Horizontal">
+                        <p:NumericTextBox TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Port for HTTP Server."
+                                            Text="{Binding Path=UserSettings.Port, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
+                        <Button Content="Start" Margin="10,2,0,2" Padding="10,2" Command="{Binding Path=StartServerCommand}"></Button>
+                        <Button Content="Stop" Margin="10,2,0,2" Padding="10,2" Command="{Binding Path=StopServerCommand}"></Button>
+                    </StackPanel>
+                    
+                </StackPanel>
             </StackPanel>
         </GroupBox>
 
