@@ -31,7 +31,6 @@ namespace PaisleyPark.ViewModels
 		public Settings UserSettings { get; set; }
 		public Preset CurrentPreset { get; set; }
 		public string WindowTitle { get; set; }
-        private bool _isServerStarted;
         public bool IsServerStarted { get; set; }
         public bool IsServerStopped { get => !IsServerStarted; }
 
@@ -53,7 +52,7 @@ namespace PaisleyPark.ViewModels
         public DelegateCommand StopServerCommand       { get; private set; }
 
         // Waymark offsets.
-        private const int WaymarkAddr = 0x1AE5960;
+        private const int WaymarkAddr = 0x1AE6960;
 
 		private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
