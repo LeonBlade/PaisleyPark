@@ -1,4 +1,4 @@
-﻿<Window x:Class="PaisleyPark.Views.MainWindow"
+<Window x:Class="PaisleyPark.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -10,21 +10,21 @@
         prism:ViewModelLocator.AutoWireViewModel="True"
         mc:Ignorable="d"
         Icon="../paisleypark.ico"
-        Title="{Binding Path=WindowTitle, FallbackValue='Paisley Park'}" 
+        Title="{Binding WindowTitle, FallbackValue=Paisley Park}" 
         SizeToContent="Height"
-        Height="200" 
+        Height="352.825" 
         Width="300"
         ResizeMode="CanMinimize">
-
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="Closing">
-            <prism:InvokeCommandAction Command="{Binding Path=ClosingCommand}" />
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
 
     <Window.Resources>
         <p:InverseBooleanConverter x:Key="InverseBooleanConverter" />
     </Window.Resources>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <prism:InvokeCommandAction Command="{Binding ClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
 
     <StackPanel Margin="10">
 
@@ -44,7 +44,7 @@
             </ComboBox>
             <Button Content="..." VerticalAlignment="Top" Command="{Binding ManagePresetsCommand}" Grid.Column="1" Width="42" Height="22" />
         </Grid>
-        
+
 
         <Button Content="Load" Margin="0,5" Command="{Binding LoadPresetCommand}"/>
 
@@ -58,16 +58,16 @@
 
                     <StackPanel Height="26" Orientation="Horizontal">
                         <p:NumericTextBox TextWrapping="Wrap" VerticalAlignment="Center" ToolTip="Delay in milliseconds for each waymark to be placed."
-                                      Text="{Binding Path=UserSettings.PlacementDelay, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
+                                      Text="{Binding UserSettings.PlacementDelay, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
                     </StackPanel>
 
                     <StackPanel Height="26" Orientation="Horizontal">
                         <p:NumericTextBox TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Port for HTTP Server."
-                                            Text="{Binding Path=UserSettings.Port, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
-                        <Button Content="Start" Margin="10,2,0,2" Padding="10,2" Command="{Binding Path=StartServerCommand}"></Button>
-                        <Button Content="Stop" Margin="10,2,0,2" Padding="10,2" Command="{Binding Path=StopServerCommand}"></Button>
+                                            Text="{Binding UserSettings.Port, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
+                        <Button Content="Start" Margin="10,2,0,2" Padding="10,2" Command="{Binding StartServerCommand}"/>
+                        <Button Content="Stop" Margin="10,2,0,2" Padding="10,2" Command="{Binding StopServerCommand}"/>
                     </StackPanel>
-                    
+
                 </StackPanel>
             </StackPanel>
         </GroupBox>

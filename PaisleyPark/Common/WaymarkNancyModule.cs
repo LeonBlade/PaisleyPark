@@ -19,7 +19,7 @@ namespace PaisleyPark.Common
     {
         public WaymarkNancyModule()
         {
-            Post["/place"] = (data) =>
+            Post["/place"] = data =>
             {
                 var waymarks = this.Bind<RESTWaymark>();
                 var e = MainWindowViewModel.EventAggregator.GetEvent<WaymarkEvent>();
