@@ -33,6 +33,11 @@ namespace PaisleyPark.Models
         public int Port { get; set; }
 
         /// <summary>
+        /// Autostarts the HTTP server on launch.
+        /// </summary>
+        public bool HTTPAutoStart { get; set; } = false;
+
+        /// <summary>
         /// How long to wait between placing waymarks.
         /// </summary>
         public int PlacementDelay { get; set; } = 200;

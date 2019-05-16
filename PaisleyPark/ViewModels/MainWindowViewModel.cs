@@ -77,10 +77,6 @@ namespace PaisleyPark.ViewModels
 			// Load the settings file.
 			UserSettings = Settings.Load();
 
-            // Initialize Nhaama.
-            if (!InitializeNhaama())
-                return;
-
             // Subscribe to the waymark event from the REST server.
             _ea.GetEvent<WaymarkEvent>().Subscribe(waymarks =>
             {
@@ -92,9 +88,6 @@ namespace PaisleyPark.ViewModels
                 WriteWaymark(waymarks.Two);
             });
 
-			// Inject our code.
-			InjectCode();
-
 			// Create the commands.
 			LoadPresetCommand = new DelegateCommand(LoadPreset);
 			ClosingCommand = new DelegateCommand(OnClose);
@@ -104,7 +97,31 @@ namespace PaisleyPark.ViewModels
 
             // Listen for property changed.
             UserSettings.PropertyChanged += OnPropertyChanged;
-		}
+
+            // Prepare for new game launch.
+            if (!Initialize())
+                return;
+        }
+
+        /// <summary>
+        /// Starts everything needed for this process.
+        /// </summary>
+        /// <returns>Successful initialization.</returns>
+        private bool Initialize()
+        {
+            // Initialize Nhaama.
+            if (!InitializeNhaama())
+                return false;
+
+            // Inject our code.
+            InjectCode();
+
+            // Check autostart and start the HTTP server if it's true.
+            if (UserSettings.HTTPAutoStart)
+                OnStartServer();
+
+            return true;
+        }
 
         /// <summary>
         /// Fetch an update for the applicaton.
@@ -172,8 +189,8 @@ namespace PaisleyPark.ViewModels
         /// <param name="e"></param>
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            // When placement delay is updated from the UI.
-            if (e.PropertyName == "PlacementDelay" || e.PropertyName == "Port")
+            // When specific properties change we save them immediately.
+            if (e.PropertyName == "PlacementDelay" || e.PropertyName == "Port" || e.PropertyName == "HTTPAutoStart")
             {
                 // Save the settings file.
                 Settings.Save(UserSettings);
@@ -226,7 +243,7 @@ namespace PaisleyPark.ViewModels
 
             // Success!
             return true;
-		}
+        }
 
         /// <summary>
         /// Show the process selector.
@@ -538,6 +555,10 @@ namespace PaisleyPark.ViewModels
         /// </summary>
         private void OnStartServer()
         {
+            // Ignore if server is already started.
+            if (IsServerStarted)
+                return;
+
             // Initialize the host.
             Host = new NancyHost(new PaisleyParkBootstrapper(), new Uri($"http://localhost:{UserSettings.Port.ToString()}"));
 
@@ -548,7 +569,6 @@ namespace PaisleyPark.ViewModels
                 IsServerStarted = true;
                 StartServerCommand.RaiseCanExecuteChanged();
                 StopServerCommand.RaiseCanExecuteChanged();
-                MessageBox.Show($"HTPP server started on port {UserSettings.Port}!", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
@@ -557,6 +577,9 @@ namespace PaisleyPark.ViewModels
             }
         }
 
+        /// <summary>
+        /// When the HTTP server stops.
+        /// </summary>
         private void OnStopServer()
         {
             try
