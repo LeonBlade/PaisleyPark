@@ -282,8 +282,20 @@ namespace PaisleyPark.ViewModels
                 Application.Current.Dispatcher.Invoke(() => { Initialize(); });
             };
 
+            // Get FFXIV game folder.
+            var ffxiv_folder = Path.GetDirectoryName(GameProcess.BaseProcess.MainModule.FileName);
+            // Read the version file.
+            var gameVersion = File.ReadAllLines(Path.Combine(ffxiv_folder, "ffxivgame.ver"))[0];
+
             // Load in the definitions file.
-            GameDefinitions = new Definitions(GameProcess);
+            try
+            {
+                GameDefinitions = Definitions.Get(GameProcess, gameVersion.ToString(), Game.GameType.Dx11);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
 
             // Create new worker.
             Worker = new BackgroundWorker();
@@ -468,7 +480,7 @@ namespace PaisleyPark.ViewModels
                     GameMemory.Two = ReadWaymark(wayTwo, WaymarkID.Two);
 
                     // Read the map ID.
-                    GameMemory.MapID = GameProcess.ReadUInt32(GameDefinitions.MapID);
+                    GameMemory.MapID = GameProcess.ReadUInt32(new Pointer(GameProcess, 0x1AE6A88, 0x5C4));
 
                     // Read in player position.
                     GameMemory.PlayerX = GameProcess.ReadFloat(playerPosition);
