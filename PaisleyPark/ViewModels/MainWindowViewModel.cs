@@ -74,10 +74,11 @@ namespace PaisleyPark.ViewModels
             // Fetch an update.
             FetchUpdate();      
 
-            // Get the version from the assembly.
-            var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-			// Set window title.
-			WindowTitle = string.Format("Paisley Park {0}", version.VersionString());
+            // Read the offsets.json file.
+            using (var r = new StreamReader("Offsets.json"))
+            {
+                Offsets = JsonConvert.DeserializeObject<Offsets>(r.ReadToEnd());
+            }
 
 			// Load the settings file.
 			UserSettings = Settings.Load();
