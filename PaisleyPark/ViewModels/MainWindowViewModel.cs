@@ -34,6 +34,7 @@ namespace PaisleyPark.ViewModels
         public bool IsServerStopped { get => !IsServerStarted; }
 
         private Thread WaymarkThread;
+        private readonly Version CurrentVersion;
 
 #pragma warning disable IDE1006 // Naming Styles
 
@@ -64,6 +65,11 @@ namespace PaisleyPark.ViewModels
 
 			logger.Info("--- PAISLEY PARK START ---");
 			logger.Info("Fetching update.");
+
+            // Get the version from the assembly.
+            CurrentVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+            // Set window title.
+            WindowTitle = string.Format("Paisley Park {0}", CurrentVersion.VersionString());
 
             // Fetch an update.
             FetchUpdate();      
