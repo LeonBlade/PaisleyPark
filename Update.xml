@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <item>
-  <version>1.3.3.0</version>
-  <url>https://github.com/LeonBlade/PaisleyPark/releases/download/v1.3.3/PaisleyPark.zip</url>
-  <changelog>https://paisleypark-changelog.glitch.me/</changelog>
+  <version>1.3.4.0</version>
+  <url>https://github.com/LeonBlade/PaisleyPark/releases/download/v1.3.4/PaisleyPark.zip</url>
   <mandatory>false</mandatory>
 </item>
