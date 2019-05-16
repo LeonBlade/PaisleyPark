@@ -1,0 +1,34 @@
+﻿<Window x:Name="window" x:Class="PaisleyPark.Views.Updater"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Common="clr-namespace:PaisleyPark.Common"
+        xmlns:prism="http://prismlibrary.com/"
+        prism:ViewModelLocator.AutoWireViewModel="True"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterOwner"
+        Title="Paisley Park Updater" 
+        Width="635"
+        Height="351"
+        ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight"
+        Common:DialogCloser.DialogResult="{Binding DialogResult}">
+    <StackPanel Orientation="Horizontal">
+        <Image Margin="20 20 10 0" Width="50" Height="50" VerticalAlignment="Top" Source="/PaisleyPark;component/paisleypark.ico" />
+        <StackPanel Margin="10" Width="520">
+            <Label Content="A new version of Paisley Park is avaiable!" FontWeight="Bold" FontSize="14" />
+            <Label Content="{Binding UpdateString, FallbackValue='Would you like to download it now?'}" />
+            <Label Content="Release Notes:" FontWeight="Bold" />
+            <Border Margin="0 10" BorderBrush="#FFBCBCBC" Background="#FFBCBCBC">
+                <WebBrowser Margin="1" Height="150" Common:BrowserBehavior.Html="{Binding HTML}" />
+            </Border>
+            <DockPanel>
+                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                    <Button Margin="0 0 2 0" Padding="20 2" Command="{Binding NoCommand}" CommandParameter="{Binding ElementName=window, Mode=OneWay}">No thanks</Button>
+                    <Button Margin="10 0 0 0" Padding="20 2" Command="{Binding InstallCommand}" CommandParameter="{Binding ElementName=window, Mode=OneWay}">Install Update</Button>
+                </StackPanel>
+            </DockPanel>
+        </StackPanel>
+    </StackPanel>
+</Window>

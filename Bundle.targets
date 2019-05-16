@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Target Name="ZipBuild" AfterTargets="Build">
     <ItemGroup>
@@ -6,6 +6,7 @@
       <ZipFiles Include="$(OutputPath)NLog.config" />
       <ZipFiles Include="$(OutputPath)AsmjitCSharp.dll" />
       <ZipFiles Include="$(OutputPath)Offsets.json" />
+      <ZipFiles Include="$(OutputPath)update.ps1" />
     </ItemGroup>
     <Zip Files="@(ZipFiles)" WorkingDirectory="$(OutputPath)" ZipFileName="$(OutputPath)PaisleyPark.zip" />
   </Target>

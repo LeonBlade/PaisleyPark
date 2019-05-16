@@ -66,11 +66,16 @@
                                             Text="{Binding UserSettings.Port, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
                         <Button Content="Start" Margin="10,2,0,2" Padding="10,2" Command="{Binding StartServerCommand}"/>
                         <Button Content="Stop" Margin="10,2,0,2" Padding="10,2" Command="{Binding StopServerCommand}"/>
+                        <CheckBox IsChecked="{Binding UserSettings.HTTPAutoStart}" Margin="5" VerticalAlignment="Center" ToolTip="Autostart server" />
                     </StackPanel>
 
                 </StackPanel>
+
             </StackPanel>
+
         </GroupBox>
+
+        <Button Margin="5" Padding="10,2" Command="{Binding DiscordCommand}">Join the Discord</Button>
 
     </StackPanel>
 
