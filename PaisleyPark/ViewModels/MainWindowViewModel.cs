@@ -1,4 +1,3 @@
-using AutoUpdaterDotNET;
 using Markdig;
 using Nancy.Hosting.Self;
 using Newtonsoft.Json;
@@ -29,7 +28,7 @@ namespace PaisleyPark.ViewModels
         private NhaamaProcess GameProcess { get; set; }
         private Definitions GameDefinitions { get; set; }
         private BackgroundWorker Worker;
-        public Memory GameMemory { get; set; } = new Memory();
+        public static Memory GameMemory { get; set; } = new Memory();
         public Settings UserSettings { get; set; }
         public Preset CurrentPreset { get; set; }
         public string WindowTitle { get; set; }
