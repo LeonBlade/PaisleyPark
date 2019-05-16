@@ -21,8 +21,7 @@ namespace PaisleyPark.ViewModels
 {
 	public class MainWindowViewModel : BindableBase
 	{
-        private static IEventAggregator _ea;
-        public static IEventAggregator EventAggregator { get => _ea; }
+        public static IEventAggregator EventAggregator { get; private set; }
 		private NhaamaProcess GameProcess { get; set; }
 		private Definitions GameDefinitions { get; set; }
 		private readonly BackgroundWorker Worker = new BackgroundWorker();
@@ -61,7 +60,7 @@ namespace PaisleyPark.ViewModels
 		public MainWindowViewModel(IEventAggregator ea)
 		{
 			// Store reference to the event aggregator.
-			_ea = ea;
+            EventAggregator = ea;
 
 			logger.Info("--- PAISLEY PARK START ---");
 			logger.Info("Fetching update.");
