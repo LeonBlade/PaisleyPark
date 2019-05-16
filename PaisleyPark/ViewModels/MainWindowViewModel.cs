@@ -310,9 +310,9 @@ namespace PaisleyPark.ViewModels
 				// Waymark function address.
 				// TODO: AoB!
 				// 48 89 6C 24 10 48 89 74 24 18 57 48 83 EC 30 8B EA 49 8B F0 48 8B F9 83 FA 06
-				var waymarkFunc = (ffxiv_dx11 + 0x7521F0).ToUint64();
+                var waymarkFunc = (ffxiv_dx11 + Offsets.WaymarkFunc).ToUint64();
 				// Waymark class instance. (?)
-				var waymarkClassPointer = (ffxiv_dx11 + 0x1AE57C0).ToUint64();
+                var waymarkClassPointer = (ffxiv_dx11 + Offsets.WaymarkClassPtr).ToUint64();
 
 				logger.Debug("FFXIV Base Address: {0}", ffxiv_dx11.ToUint64().AsHex());
 				logger.Debug("Waymark Function: {0}", waymarkFunc.AsHex());
@@ -385,12 +385,12 @@ namespace PaisleyPark.ViewModels
 			var ffxiv = GameProcess.BaseProcess.MainModule.BaseAddress;
 
 			// pointers for waymark positions
-			var wayA = (ffxiv + WaymarkAddr + 0x00).ToUint64();
-			var wayB = (ffxiv + WaymarkAddr + 0x20).ToUint64();
-			var wayC = (ffxiv + WaymarkAddr + 0x40).ToUint64();
-			var wayD = (ffxiv + WaymarkAddr + 0x60).ToUint64();
-			var wayOne = (ffxiv + WaymarkAddr + 0x80).ToUint64();
-			var wayTwo = (ffxiv + WaymarkAddr + 0xA0).ToUint64();
+            var wayA = (ffxiv + Offsets.Waymarks + 0x00).ToUint64();
+            var wayB = (ffxiv + Offsets.Waymarks + 0x20).ToUint64();
+            var wayC = (ffxiv + Offsets.Waymarks + 0x40).ToUint64();
+            var wayD = (ffxiv + Offsets.Waymarks + 0x60).ToUint64();
+            var wayOne = (ffxiv + Offsets.Waymarks + 0x80).ToUint64();
+            var wayTwo = (ffxiv + Offsets.Waymarks + 0xA0).ToUint64();
 
 			// Worker loop runs indefinitely.
 			while (true)
