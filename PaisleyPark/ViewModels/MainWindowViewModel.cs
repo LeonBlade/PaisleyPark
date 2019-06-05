@@ -1,3 +1,11 @@
+using System;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
 using Markdig;
 using Nancy.Hosting.Self;
 using Newtonsoft.Json;
@@ -11,14 +19,6 @@ using PaisleyPark.Views;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
-using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace PaisleyPark.ViewModels
 {
@@ -44,6 +44,7 @@ namespace PaisleyPark.ViewModels
 
         // Memory addresses for our injection.
         public ulong _newmem { get; private set; }
+
         public ulong _inject { get; private set; }
 
 #pragma warning restore IDE1006 // Naming Styles
@@ -175,7 +176,7 @@ namespace PaisleyPark.ViewModels
                                     if (File.Exists("PaisleyPark.zip"))
                                         File.Delete("PaisleyPark.zip");
 
-                                    // Download the file. 
+                                    // Download the file.
                                     wc.DownloadFile(new Uri(json["assets"][0]["browser_download_url"].Value<string>()), "PaisleyPark.zip");
 
                                     // Get temp path for update script to run on.
@@ -197,7 +198,7 @@ namespace PaisleyPark.ViewModels
 
                                     // Run the update script.
                                     Process.Start("powershell.exe", $"{script} \"{Environment.CurrentDirectory}\"");
-                                }                                
+                                }
                             }
                         }
                     }
@@ -317,8 +318,11 @@ namespace PaisleyPark.ViewModels
         {
             // Create a new process selector window.
             var ps = new ProcessSelector();
+
             // Get the view model.
             var vm = ps.DataContext as ProcessSelectorViewModel;
+            vm.UserSettings = this.UserSettings;
+
             // Set the process list.
             vm.ProcessList = new System.Collections.ObjectModel.ObservableCollection<Process>(procs);
 
@@ -697,6 +701,7 @@ namespace PaisleyPark.ViewModels
             if (_newmem != 0)
                 GameProcess.Dealloc(_newmem);
 
+            Settings.Save(UserSettings);
             NLog.LogManager.Shutdown();
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using PaisleyPark.ViewModels;
 
 namespace PaisleyPark.Views
 {
@@ -10,6 +11,8 @@ namespace PaisleyPark.Views
         public ProcessSelector()
         {
             InitializeComponent();
+
+            this.Closed += (_, __) => (this.DataContext as ProcessSelectorViewModel).CloseCommand.Execute(null);
         }
     }
 }

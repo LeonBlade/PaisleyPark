@@ -2,3 +2,5 @@
 \.vs/
 
 packages/
+
+*.dll

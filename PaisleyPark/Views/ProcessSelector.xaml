@@ -9,34 +9,35 @@
         xmlns:p="clr-namespace:PaisleyPark.Common"
         p:DialogCloser.DialogResult="{Binding Path=DialogResult}"
         mc:Ignorable="d"
-        Title="Process Selector" 
+        Title="Process Selector"
         SizeToContent="Height"
         ResizeMode="CanMinimize"
-        WindowStartupLocation="CenterOwner"
         Height="370"
-        Width="350">
-    <StackPanel Margin="10">
-        <Label Content="Processes" />
-        <ListBox ItemsSource="{Binding Path=ProcessList, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding Path=SelectedProcess}" Height="264">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Path=Id}" Margin="0,0,10,0" />
-                        <TextBlock Text="{Binding Path=MainWindowTitle}" Margin="0,0,10,0" />
-                        <TextBlock Text="{Binding Path=ProcessName}" />
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-        <DockPanel>
-            <Button Content="Refresh" Margin="0,5" HorizontalAlignment="Left" Padding="20,2"
-                    Command="{Binding Path=RefreshCommand}"/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Switch to" Margin="0,5,5,5" HorizontalAlignment="Right" Padding="20,2"
-                        Command="{Binding Path=SwitchCommand}"/>
-                <Button Content="OK" Margin="0,5" HorizontalAlignment="Right" Padding="20,2"
+        Width="350"
+        Top="{Binding UserSettings.Top, Mode=TwoWay}"
+        Left="{Binding UserSettings.Left, Mode=TwoWay}">
+  <StackPanel Margin="10">
+    <Label Content="Processes" />
+    <ListBox ItemsSource="{Binding Path=ProcessList, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding Path=SelectedProcess}" Height="264">
+      <ListBox.ItemTemplate>
+        <DataTemplate>
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Path=Id}" Margin="0,0,10,0" />
+            <TextBlock Text="{Binding Path=MainWindowTitle}" Margin="0,0,10,0" />
+            <TextBlock Text="{Binding Path=ProcessName}" />
+          </StackPanel>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+    <DockPanel>
+      <Button Content="Refresh" Margin="0,5" HorizontalAlignment="Left" Padding="20,2"
+                    Command="{Binding Path=RefreshCommand}" />
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+        <Button Content="Switch to" Margin="0,5,5,5" HorizontalAlignment="Right" Padding="20,2"
+                        Command="{Binding Path=SwitchCommand}" />
+        <Button Content="OK" Margin="0,5" HorizontalAlignment="Right" Padding="20,2"
                         Command="{Binding Path=OKCommand}" CommandParameter="{Binding ElementName=window, Mode=OneWay}" />
-            </StackPanel>
-        </DockPanel>
-    </StackPanel>
+      </StackPanel>
+    </DockPanel>
+  </StackPanel>
 </Window>

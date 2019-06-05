@@ -10,73 +10,69 @@
         prism:ViewModelLocator.AutoWireViewModel="True"
         mc:Ignorable="d"
         Icon="../paisleypark.ico"
-        Title="{Binding WindowTitle, FallbackValue=Paisley Park}" 
+        Title="{Binding WindowTitle, FallbackValue=Paisley Park}"
         SizeToContent="Height"
-        Height="352.825" 
+        Height="352.825"
         Width="300"
+        Top="{Binding UserSettings.Top, Mode=TwoWay}"
+        Left="{Binding UserSettings.Left, Mode=TwoWay}"
         ResizeMode="CanMinimize">
 
-    <Window.Resources>
-        <p:InverseBooleanConverter x:Key="InverseBooleanConverter" />
-    </Window.Resources>
+  <Window.Resources>
+    <p:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+  </Window.Resources>
 
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="Closing">
-            <prism:InvokeCommandAction Command="{Binding ClosingCommand}" />
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
+  <i:Interaction.Triggers>
+    <i:EventTrigger EventName="Closing">
+      <prism:InvokeCommandAction Command="{Binding ClosingCommand}" />
+    </i:EventTrigger>
+  </i:Interaction.Triggers>
 
-    <StackPanel Margin="10">
+  <StackPanel Margin="10">
 
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <ComboBox VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="0,0,10,0"
-                      ItemsSource="{Binding UserSettings.Presets, UpdateSourceTrigger=PropertyChanged}" 
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <ComboBox VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="0,0,10,0"
+                      ItemsSource="{Binding UserSettings.Presets, UpdateSourceTrigger=PropertyChanged}"
                       SelectedItem="{Binding CurrentPreset, Mode=OneWayToSource}">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Name, FallbackValue=???}" />
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-            <Button Content="..." VerticalAlignment="Top" Command="{Binding ManagePresetsCommand}" Grid.Column="1" Width="42" Height="22" />
-        </Grid>
+        <ComboBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding Name, FallbackValue=???}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <Button Content="..." VerticalAlignment="Top" Command="{Binding ManagePresetsCommand}" Grid.Column="1" Width="42" Height="22" />
+    </Grid>
 
+    <Button Content="Load" Margin="0,5" Command="{Binding LoadPresetCommand}" />
 
-        <Button Content="Load" Margin="0,5" Command="{Binding LoadPresetCommand}"/>
+    <GroupBox Header="Settings" Height="78">
+      <StackPanel Orientation="Horizontal">
+        <StackPanel Orientation="Vertical">
+          <Label Content="Delay" VerticalAlignment="Center" Margin="0,0,5,0" Height="26" />
+          <Label Content="Port" VerticalAlignment="Center" Margin="0,0,5,0" />
+        </StackPanel>
+        <StackPanel Orientation="Vertical">
 
-        <GroupBox Header="Settings" Height="78">
-            <StackPanel Orientation="Horizontal">
-                <StackPanel Orientation="Vertical">
-                    <Label Content="Delay" VerticalAlignment="Center" Margin="0,0,5,0" Height="26"/>
-                    <Label Content="Port" VerticalAlignment="Center" Margin="0,0,5,0"/>
-                </StackPanel>
-                <StackPanel Orientation="Vertical">
+          <StackPanel Height="26" Orientation="Horizontal">
+            <p:NumericTextBox TextWrapping="Wrap" VerticalAlignment="Center" ToolTip="Delay in milliseconds for each waymark to be placed."
+                                      Text="{Binding UserSettings.PlacementDelay, UpdateSourceTrigger=PropertyChanged}" Width="60" />
+          </StackPanel>
 
-                    <StackPanel Height="26" Orientation="Horizontal">
-                        <p:NumericTextBox TextWrapping="Wrap" VerticalAlignment="Center" ToolTip="Delay in milliseconds for each waymark to be placed."
-                                      Text="{Binding UserSettings.PlacementDelay, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
-                    </StackPanel>
+          <StackPanel Height="26" Orientation="Horizontal">
+            <p:NumericTextBox TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Port for HTTP Server."
+                                            Text="{Binding UserSettings.Port, UpdateSourceTrigger=PropertyChanged}" Width="60" />
+            <Button Content="Start" Margin="10,2,0,2" Padding="10,2" Command="{Binding StartServerCommand}" />
+            <Button Content="Stop" Margin="10,2,0,2" Padding="10,2" Command="{Binding StopServerCommand}" />
+            <CheckBox IsChecked="{Binding UserSettings.HTTPAutoStart}" Margin="5" VerticalAlignment="Center" ToolTip="Autostart server" />
+          </StackPanel>
+        </StackPanel>
+      </StackPanel>
+    </GroupBox>
 
-                    <StackPanel Height="26" Orientation="Horizontal">
-                        <p:NumericTextBox TextWrapping="Wrap" HorizontalAlignment="Left" VerticalAlignment="Center" ToolTip="Port for HTTP Server."
-                                            Text="{Binding UserSettings.Port, UpdateSourceTrigger=PropertyChanged}" Width="60"/>
-                        <Button Content="Start" Margin="10,2,0,2" Padding="10,2" Command="{Binding StartServerCommand}"/>
-                        <Button Content="Stop" Margin="10,2,0,2" Padding="10,2" Command="{Binding StopServerCommand}"/>
-                        <CheckBox IsChecked="{Binding UserSettings.HTTPAutoStart}" Margin="5" VerticalAlignment="Center" ToolTip="Autostart server" />
-                    </StackPanel>
-
-                </StackPanel>
-
-            </StackPanel>
-
-        </GroupBox>
-
-        <Button Margin="5" Padding="10,2" Command="{Binding DiscordCommand}">Join the Discord</Button>
-
-    </StackPanel>
-
+    <Button Margin="5" Padding="10,2" Command="{Binding DiscordCommand}">Join the Discord</Button>
+  </StackPanel>
 </Window>
