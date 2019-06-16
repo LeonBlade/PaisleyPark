@@ -7,14 +7,23 @@
         xmlns:prism="http://prismlibrary.com/"
         prism:ViewModelLocator.AutoWireViewModel="True"
         xmlns:p="clr-namespace:PaisleyPark.Common"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         p:DialogCloser.DialogResult="{Binding Path=DialogResult}"
         mc:Ignorable="d"
         Title="Process Selector" 
         SizeToContent="Height"
         ResizeMode="CanMinimize"
-        WindowStartupLocation="CenterOwner"
+        Top="{Binding UserSettings.Top, Mode=TwoWay}"
+        Left="{Binding UserSettings.Left, Mode=TwoWay}"
         Height="387"
         Width="367">
+    
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <prism:InvokeCommandAction Command="{Binding ClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    
     <StackPanel Margin="10">
         <DockPanel>
             <Label Content="Processes" VerticalAlignment="Center" />

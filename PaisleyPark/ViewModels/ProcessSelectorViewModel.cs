@@ -13,12 +13,14 @@ namespace PaisleyPark.ViewModels
 {
     public class ProcessSelectorViewModel : BindableBase
     {
+		public Settings UserSettings { get; set; }
         public ObservableCollection<Process> ProcessList { get; set; }
         public Process SelectedProcess { get; set; }
         public ICommand RefreshCommand { get; private set; }
         public ICommand OKCommand { get; private set; }
         public ICommand SwitchCommand { get; private set; }
 		public ICommand ManageCommand { get; private set; }
+		public ICommand ClosingCommand { get; private set; }
         public bool? DialogResult { get; set; }
 
         public ProcessSelectorViewModel()
@@ -27,7 +29,8 @@ namespace PaisleyPark.ViewModels
             OKCommand = new DelegateCommand<Window>(OnOK);
             SwitchCommand = new DelegateCommand(OnSwitch);
 			ManageCommand = new DelegateCommand(OnManage);
-        }
+			ClosingCommand = new DelegateCommand(OnClose);
+		}
 
         private void OnRefresh()
         {
@@ -72,8 +75,16 @@ namespace PaisleyPark.ViewModels
 				// Reassign presets in user settings to the ones managed by the window.
 				settings.Presets = vm.Presets;
 				// Save the settings.
-				Settings.Save(settings);
+				Settings.Save(UserSettings);
 			}
+		}
+
+		/// <summary>
+		/// When the window is closed.
+		/// </summary>
+		private void OnClose()
+		{
+//			Settings.Save(UserSetin)
 		}
 
         [DllImport("user32.dll")]

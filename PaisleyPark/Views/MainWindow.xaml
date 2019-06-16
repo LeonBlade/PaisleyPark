@@ -12,7 +12,9 @@
         Icon="../paisleypark.ico"
         Title="{Binding WindowTitle, FallbackValue=Paisley Park}" 
         SizeToContent="Height"
-        Height="352.825" 
+        Top="{Binding UserSettings.Top, Mode=TwoWay}"
+        Left="{Binding UserSettings.Left, Mode=TwoWay}"
+        Height="352" 
         Width="300"
         ResizeMode="CanMinimize">
 

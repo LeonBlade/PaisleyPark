@@ -43,6 +43,16 @@ namespace PaisleyPark.Models
         public int PlacementDelay { get; set; } = 200;
 
 		/// <summary>
+		/// MainWindow top position
+		/// </summary>
+		public double Top { get; set; } = 200;
+
+		/// <summary>
+		/// MainWindow left position
+		/// </summary>
+		public double Left { get; set; } = 200;
+
+		/// <summary>
 		/// List of presets to be saved to the file.
 		/// </summary>
 		public ObservableCollection<Preset> Presets { get; set; } = new ObservableCollection<Preset>();
@@ -64,7 +74,7 @@ namespace PaisleyPark.Models
 			using (var text = File.CreateText(fullPath))
 			{
 				// Save the contents of the file.
-				text.Write(JsonConvert.SerializeObject(settings));
+				text.Write(JsonConvert.SerializeObject(settings, Formatting.Indented));
 			}
 		}
 

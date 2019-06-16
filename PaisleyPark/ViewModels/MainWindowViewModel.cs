@@ -231,6 +231,9 @@ namespace PaisleyPark.ViewModels
             }
         }
 
+		/// <summary>
+		/// Clicking the Discord link.
+		/// </summary>
 		private void OnDiscord()
 		{
 			Process.Start(new ProcessStartInfo(DiscordUri));
@@ -325,6 +328,8 @@ namespace PaisleyPark.ViewModels
             var ps = new ProcessSelector();
             // Get the view model.
             var vm = ps.DataContext as ProcessSelectorViewModel;
+			// Set the settings.
+			vm.UserSettings = UserSettings;
             // Set the process list.
             vm.ProcessList = new System.Collections.ObjectModel.ObservableCollection<Process>(procs);
 
@@ -702,6 +707,9 @@ namespace PaisleyPark.ViewModels
                 GameProcess.Dealloc(_inject);
             if (_newmem != 0)
                 GameProcess.Dealloc(_newmem);
+
+			// Save the settings.
+			Settings.Save(UserSettings);
 
             NLog.LogManager.Shutdown();
         }
