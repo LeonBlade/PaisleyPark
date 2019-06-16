@@ -51,10 +51,29 @@ namespace PaisleyPark.ViewModels
 		}
 
 		/// <summary>
+		/// Used to check if you can do a certain function on this view.
+		/// </summary>
+		/// <returns></returns>
+		private bool CheckCanDo()
+		{
+			if (Application.Current.MainWindow == null || !Application.Current.MainWindow.IsInitialized)
+			{
+				MessageBox.Show("You can't create or modify a preset right now.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Warning);
+				return false;
+			}
+
+			return true;
+		}
+
+		/// <summary>
 		/// Adding new preset.
 		/// </summary>
 		private void OnAddPreset()
 		{
+			// Can't do unless game is loaded.
+			if (!CheckCanDo())
+				return;
+
             // Create window for add preset.
             var win = new NewPreset
             {
@@ -107,6 +126,10 @@ namespace PaisleyPark.ViewModels
 		/// </summary>
 		private void OnEdit()
 		{
+			// Can't do unless game is loaded.
+			if (!CheckCanDo())
+				return;
+
 			try
 			{
 				if (SelectedItem == null)

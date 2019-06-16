@@ -75,7 +75,9 @@
 
         </GroupBox>
 
-        <Button Margin="5" Padding="10,2" Command="{Binding DiscordCommand}">Join the Discord</Button>
+        <Label HorizontalAlignment="Right">
+            <Hyperlink NavigateUri="{Binding DiscordUri}">Join the Discord</Hyperlink>
+        </Label>
 
     </StackPanel>
 

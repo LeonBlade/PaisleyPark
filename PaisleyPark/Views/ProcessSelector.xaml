@@ -13,10 +13,13 @@
         SizeToContent="Height"
         ResizeMode="CanMinimize"
         WindowStartupLocation="CenterOwner"
-        Height="370"
-        Width="350">
+        Height="387"
+        Width="367">
     <StackPanel Margin="10">
-        <Label Content="Processes" />
+        <DockPanel>
+            <Label Content="Processes" VerticalAlignment="Center" />
+            <Button Content="Refresh" Margin="0,5" HorizontalAlignment="Right" Padding="20,2" Command="{Binding Path=RefreshCommand}"/>
+        </DockPanel>
         <ListBox ItemsSource="{Binding Path=ProcessList, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding Path=SelectedProcess}" Height="264">
             <ListBox.ItemTemplate>
                 <DataTemplate>
@@ -29,8 +32,8 @@
             </ListBox.ItemTemplate>
         </ListBox>
         <DockPanel>
-            <Button Content="Refresh" Margin="0,5" HorizontalAlignment="Left" Padding="20,2"
-                    Command="{Binding Path=RefreshCommand}"/>
+            <Button Content="View Presets" Margin="0,5,5,5" HorizontalAlignment="Left" Padding="20,2" ToolTip="Not all functionality will be present if the game isn't loaded!"
+                        Command="{Binding Path=ManageCommand}"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Switch to" Margin="0,5,5,5" HorizontalAlignment="Right" Padding="20,2"
                         Command="{Binding Path=SwitchCommand}"/>

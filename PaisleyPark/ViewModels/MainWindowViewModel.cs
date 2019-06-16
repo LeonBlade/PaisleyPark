@@ -39,11 +39,12 @@ namespace PaisleyPark.ViewModels
         private Thread WaymarkThread;
         private readonly Offsets Offsets;
         private readonly Version CurrentVersion;
+		public string DiscordUri { get; private set; } = "https://discord.gg/hq3DnBa";
 
 #pragma warning disable IDE1006 // Naming Styles
 
-        // Memory addresses for our injection.
-        public ulong _newmem { get; private set; }
+		// Memory addresses for our injection.
+		public ulong _newmem { get; private set; }
         public ulong _inject { get; private set; }
 
 #pragma warning restore IDE1006 // Naming Styles
@@ -84,12 +85,12 @@ namespace PaisleyPark.ViewModels
             // Subscribe to the waymark event from the REST server.
             EventAggregator.GetEvent<WaymarkEvent>().Subscribe(waymarks =>
             {
-                WriteWaymark(waymarks.A);
-                WriteWaymark(waymarks.B);
-                WriteWaymark(waymarks.C);
-                WriteWaymark(waymarks.D);
-                WriteWaymark(waymarks.One);
-                WriteWaymark(waymarks.Two);
+                WriteWaymark(waymarks.A, 0);
+                WriteWaymark(waymarks.B, 1);
+                WriteWaymark(waymarks.C, 2);
+                WriteWaymark(waymarks.D, 3);
+                WriteWaymark(waymarks.One, 4);
+                WriteWaymark(waymarks.Two, 5);
             });
 
             // Create the commands.
@@ -98,7 +99,6 @@ namespace PaisleyPark.ViewModels
             ManagePresetsCommand = new DelegateCommand(OnManagePresets);
             StartServerCommand = new DelegateCommand(OnStartServer).ObservesCanExecute(() => IsServerStopped);
             StopServerCommand = new DelegateCommand(OnStopServer).ObservesCanExecute(() => IsServerStarted);
-            DiscordCommand = new DelegateCommand(() => { Process.Start("https://discord.gg/hq3DnBa"); });
 
             // Listen for property changed.
             UserSettings.PropertyChanged += OnPropertyChanged;
@@ -504,7 +504,7 @@ namespace PaisleyPark.ViewModels
         /// Write a waymark in memory and place it.
         /// </summary>
         /// <param name="waymark">Waymark to place.</param>
-        private void WriteWaymark(Waymark waymark)
+        private void WriteWaymark(Waymark waymark, int id = -1)
         {
             // Ensure the waymark isn't null.
             if (waymark == null)
@@ -516,7 +516,7 @@ namespace PaisleyPark.ViewModels
             GameProcess.Write(_newmem + 0x8, waymark.Z);
 
             // Write the waymark ID.
-            GameProcess.Write(_newmem + 0xC, (byte)waymark.ID);
+            GameProcess.Write(_newmem + 0xC, (byte)(id == -1?(byte)waymark.ID:id));
 
             // Write the enable state
             GameProcess.Write(_newmem + 0xD, (byte)(waymark.Active ? 1 : 0));
@@ -587,12 +587,12 @@ namespace PaisleyPark.ViewModels
 
                 WaymarkThread = new Thread(() =>
                 {
-                    WriteWaymark(CurrentPreset.A);
-                    WriteWaymark(CurrentPreset.B);
-                    WriteWaymark(CurrentPreset.C);
-                    WriteWaymark(CurrentPreset.D);
-                    WriteWaymark(CurrentPreset.One);
-                    WriteWaymark(CurrentPreset.Two);
+                    WriteWaymark(CurrentPreset.A, 0);
+                    WriteWaymark(CurrentPreset.B, 1);
+                    WriteWaymark(CurrentPreset.C, 2);
+                    WriteWaymark(CurrentPreset.D, 3);
+                    WriteWaymark(CurrentPreset.One, 4);
+                    WriteWaymark(CurrentPreset.Two, 5);
                 });
 
                 WaymarkThread.Start();

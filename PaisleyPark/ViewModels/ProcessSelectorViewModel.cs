@@ -1,4 +1,6 @@
-﻿using Prism.Commands;
+﻿using PaisleyPark.Models;
+using PaisleyPark.Views;
+using Prism.Commands;
 using Prism.Mvvm;
 using System;
 using System.Collections.ObjectModel;
@@ -16,6 +18,7 @@ namespace PaisleyPark.ViewModels
         public ICommand RefreshCommand { get; private set; }
         public ICommand OKCommand { get; private set; }
         public ICommand SwitchCommand { get; private set; }
+		public ICommand ManageCommand { get; private set; }
         public bool? DialogResult { get; set; }
 
         public ProcessSelectorViewModel()
@@ -23,6 +26,7 @@ namespace PaisleyPark.ViewModels
             RefreshCommand = new DelegateCommand(OnRefresh);
             OKCommand = new DelegateCommand<Window>(OnOK);
             SwitchCommand = new DelegateCommand(OnSwitch);
+			ManageCommand = new DelegateCommand(OnManage);
         }
 
         private void OnRefresh()
@@ -45,6 +49,32 @@ namespace PaisleyPark.ViewModels
             // Switch to the main window.
             SwitchToThisWindow(SelectedProcess.MainWindowHandle, false);
         }
+
+		/// <summary>
+		/// Opens the preset manager to import/export when game isn't open.
+		/// </summary>
+		private void OnManage()
+		{
+			var settings = Settings.Load();
+
+			// Create new preset manager window.
+			var win = new PresetManager();
+
+			// Pull view model from window.
+			var vm = win.DataContext as PresetManagerViewModel;
+
+			// Populate the presets with our current presets as a new instance.
+			vm.Presets = new ObservableCollection<Preset>(settings.Presets);
+
+			// Check if we're saving changes.
+			if (win.ShowDialog() == true)
+			{
+				// Reassign presets in user settings to the ones managed by the window.
+				settings.Presets = vm.Presets;
+				// Save the settings.
+				Settings.Save(settings);
+			}
+		}
 
         [DllImport("user32.dll")]
         public static extern void SwitchToThisWindow(IntPtr hWnd, bool turnon);
