@@ -57,7 +57,7 @@ namespace PaisleyPark.ViewModels
         public DelegateCommand StopServerCommand { get; private set; }
         public DelegateCommand DiscordCommand { get; private set; }
 
-        public MainWindowViewModel(IEventAggregator ea)
+		public MainWindowViewModel(IEventAggregator ea)
         {
             // Store reference to the event aggregator.
             EventAggregator = ea;
@@ -99,6 +99,7 @@ namespace PaisleyPark.ViewModels
             ManagePresetsCommand = new DelegateCommand(OnManagePresets);
             StartServerCommand = new DelegateCommand(OnStartServer).ObservesCanExecute(() => IsServerStopped);
             StopServerCommand = new DelegateCommand(OnStopServer).ObservesCanExecute(() => IsServerStarted);
+			DiscordCommand = new DelegateCommand(OnDiscord);
 
             // Listen for property changed.
             UserSettings.PropertyChanged += OnPropertyChanged;
@@ -229,6 +230,11 @@ namespace PaisleyPark.ViewModels
                 logger.Error(ex, "Update failed when requesting update from Github.");
             }
         }
+
+		private void OnDiscord()
+		{
+			Process.Start(new ProcessStartInfo(DiscordUri));
+		}
 
         /// <summary>
         /// User Settings changed.

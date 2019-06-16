@@ -76,7 +76,7 @@
         </GroupBox>
 
         <Label HorizontalAlignment="Right">
-            <Hyperlink NavigateUri="{Binding DiscordUri}">Join the Discord</Hyperlink>
+            <Hyperlink Command="{Binding DiscordCommand}">Join the Discord</Hyperlink>
         </Label>
 
     </StackPanel>
