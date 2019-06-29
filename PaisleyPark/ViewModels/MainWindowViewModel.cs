@@ -73,11 +73,45 @@ namespace PaisleyPark.ViewModels
             // Fetch an update.
             FetchUpdate();
 
-            // Read the offsets.json file.
-            using (var r = new StreamReader("Offsets.json"))
-            {
-                Offsets = JsonConvert.DeserializeObject<Offsets>(r.ReadToEnd());
-            }
+			logger.Info($"Loading Offsets.json from {Environment.CurrentDirectory}");
+
+			// Read the offsets.json file.
+			try
+			{
+				using (var r = new StreamReader(Path.Combine(Environment.CurrentDirectory, "Offsets.json")))
+				{
+					Offsets = JsonConvert.DeserializeObject<Offsets>(r.ReadToEnd());
+				}
+			}
+			catch (Exception)
+			{
+				MessageBox.Show("Couldn't load the offsets file!  Please select the offsets file manually.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+				var dlg = new Microsoft.Win32.OpenFileDialog
+				{
+					InitialDirectory = Environment.CurrentDirectory,
+					DefaultExt = ".json",
+					Filter = "JSON Files (*.json)|*.json|All files (*.*)|*.*"
+				};
+
+				// Show dialog.
+				var result = dlg.ShowDialog();
+
+				if (result == true)
+				{
+					try
+					{
+						using (var r = new StreamReader(dlg.FileName))
+						{
+							Offsets = JsonConvert.DeserializeObject<Offsets>(r.ReadToEnd());
+						}
+					}
+					catch (Exception)
+					{
+						MessageBox.Show("Could not open this offset file. Shutting down.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+						Application.Current.Shutdown();
+					}
+				}
+			}
 
             // Load the settings file.
             UserSettings = Settings.Load();
