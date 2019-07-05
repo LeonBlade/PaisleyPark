@@ -7,3 +7,4 @@ Expand-Archive -path "$path\PaisleyPark.zip" -destinationpath "$path" -Force
 Remove-Item -path "$path\PaisleyPark.zip"
 cd "$path"
 Start-Process "$path\PaisleyPark.exe"
+Start-Sleep -Seconds 5
