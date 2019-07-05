@@ -410,8 +410,9 @@ namespace PaisleyPark.ViewModels
                 // TODO: AoB!
                 // 48 89 6C 24 10 48 89 74 24 18 57 48 83 EC 30 8B EA 49 8B F0 48 8B F9 83 FA 06
                 var waymarkFunc = (ffxiv_dx11 + Offsets.WaymarkFunc).ToUint64();
-                // Waymark class instance. (?)
-                var waymarkClassPointer = (ffxiv_dx11 + Offsets.WaymarkClassPtr).ToUint64();
+				// Waymark class instance. (?)
+				// 45 33 c0 8d 57 ff 48 8d 0d (lea rcx offset before call to function) 
+				var waymarkClassPointer = (ffxiv_dx11 + Offsets.WaymarkClassPtr).ToUint64();
 
                 logger.Debug("FFXIV Base Address: {0}", ffxiv_dx11.ToUint64().AsHex());
                 logger.Debug("Waymark Function: {0}", waymarkFunc.AsHex());
