@@ -2,7 +2,7 @@ configuration: Release
 platform: x64
 
 image:
-  - Visual Studio 2017
+  - Visual Studio 2019
   
 cache:
   - packages -> **\packages.config
@@ -15,9 +15,6 @@ before_build:
   
 build:
   project: PaisleyPark.sln
-    
-#after_build:
-#  7z a FFXIVTool.zip %APPVEYOR_BUILD_FOLDER%\FFXIVTool\bin\%CONFIGURATION%\*.exe %APPVEYOR_BUILD_FOLDER%\FFXIVTool\bin\%CONFIGURATION%\*.txt %APPVEYOR_BUILD_FOLDER%\FFXIVTool\bin\%CONFIGURATION%\OffsetSettings.xml %APPVEYOR_BUILD_FOLDER%\FFXIVTool\bin\%CONFIGURATION%\SSToolsUpdater.exe %APPVEYOR_BUILD_FOLDER%\FFXIVTool\bin\%CONFIGURATION%\Definitions\
     
 artifacts:
   - path: PaisleyPark.zip
