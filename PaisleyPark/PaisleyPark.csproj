@@ -255,11 +255,11 @@
     <Resource Include="FodyWeavers.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Nhaama\Nhaama.FFXIV\Nhaama.FFXIV.csproj">
+    <ProjectReference Include="..\lib\Nhaama.FFXIV\Nhaama.FFXIV.csproj">
       <Project>{af6e37bd-4598-4194-945b-c8f6ee9309fe}</Project>
       <Name>Nhaama.FFXIV</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Nhaama\Nhaama.Memory\Nhaama.Memory.csproj">
+    <ProjectReference Include="..\lib\Nhaama.Memory\Nhaama.Memory.csproj">
       <Project>{933935a7-8d04-42e8-aee5-122b3aeed820}</Project>
       <Name>Nhaama.Memory</Name>
     </ProjectReference>
