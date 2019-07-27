@@ -2,3 +2,4 @@
 \.vs/
 
 packages/
+.DS_Store
