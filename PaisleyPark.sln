@@ -11,9 +11,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{9456CD43-2
 		Update.xml = Update.xml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nhaama.FFXIV", "..\Nhaama\Nhaama.FFXIV\Nhaama.FFXIV.csproj", "{AF6E37BD-4598-4194-945B-C8F6EE9309FE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nhaama.FFXIV", "lib\Nhaama.FFXIV\Nhaama.FFXIV.csproj", "{AF6E37BD-4598-4194-945B-C8F6EE9309FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nhaama.Memory", "..\Nhaama\Nhaama.Memory\Nhaama.Memory.csproj", "{933935A7-8D04-42E8-AEE5-122B3AEED820}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nhaama.Memory", "lib\Nhaama.Memory\Nhaama.Memory.csproj", "{933935A7-8D04-42E8-AEE5-122B3AEED820}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
