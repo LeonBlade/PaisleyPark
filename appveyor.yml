@@ -1,0 +1,35 @@
+configuration: Release
+
+image:
+  - Visual Studio 2017
+  
+cache:
+  - packages -> **\packages.config
+
+before_build:
+  - git submodule update --init --recursive --remote
+  - nuget restore PaisleyPark.sln
+  - nuget restore lib/Nhaama.FFXIV/Nhaama.FFXIV.csproj
+  - nuget restore lib/Nhaama.Memory/Nhaama.Memory.csproj
+  
+build:
+  project: PaisleyPark.sln
+    
+#after_build:
+#  7z a FFXIVTool.zip %APPVEYOR_BUILD_FOLDER%\FFXIVTool\bin\%CONFIGURATION%\*.exe %APPVEYOR_BUILD_FOLDER%\FFXIVTool\bin\%CONFIGURATION%\*.txt %APPVEYOR_BUILD_FOLDER%\FFXIVTool\bin\%CONFIGURATION%\OffsetSettings.xml %APPVEYOR_BUILD_FOLDER%\FFXIVTool\bin\%CONFIGURATION%\SSToolsUpdater.exe %APPVEYOR_BUILD_FOLDER%\FFXIVTool\bin\%CONFIGURATION%\Definitions\
+    
+artifacts:
+  - path: PaisleyPark.zip
+    name: PaisleyPark
+
+deploy:
+  tag: $(appveyor_repo_tag_name)
+  release: Paisley Park $(appveyor_repo_tag_name)
+  provider: GitHub
+  draft: true
+  auth_token:
+    secure: O6Rsj+hoS5X7Q1u7TjtFwjRN53ohwjF8Mik/BpVidoefAag5FfpxoWqS5GTdJECG
+  artifact: PaisleyPark.zip
+  on:
+    branch: master
+    appveyor_repo_tag: true
