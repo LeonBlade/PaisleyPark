@@ -337,6 +337,7 @@ namespace PaisleyPark.ViewModels
             }
             catch (Exception ex)
             {
+                GameDefinitions = Definitions.Get(GameProcess, "2019.07.10.0001.0000", Game.GameType.Dx11);
                 Console.WriteLine(ex);
             }
 
