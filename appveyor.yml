@@ -15,9 +15,9 @@ before_build:
   
 build:
   project: PaisleyPark.sln
-    
+  
 artifacts:
-  - path: PaisleyPark.zip
+  - path: PaisleyPark\bin\x64\Release\PaisleyPark.zip
     name: PaisleyPark
 
 deploy:
@@ -27,7 +27,7 @@ deploy:
   draft: true
   auth_token:
     secure: O6Rsj+hoS5X7Q1u7TjtFwjRN53ohwjF8Mik/BpVidoefAag5FfpxoWqS5GTdJECG
-  artifact: PaisleyPark.zip
+  artifact: PaisleyPark
   on:
     branch: master
     appveyor_repo_tag: true
