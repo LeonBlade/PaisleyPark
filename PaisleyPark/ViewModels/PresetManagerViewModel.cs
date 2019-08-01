@@ -74,36 +74,44 @@ namespace PaisleyPark.ViewModels
 			if (!CheckCanDo())
 				return;
 
-            // Create window for add preset.
-            var win = new NewPreset
-            {
-                // Owner set to MainWindow.
-                Owner = Application.Current.MainWindow
-            };
-
-			// Get the VM for this window.
-			var vm = win.DataContext as NewPresetViewModel;
-
-			// Show the dialog for the preset window.
-			if (win.ShowDialog() == true)
+			try 
 			{
-				// Initialize the creation of our preset with the preset name.
-				var p = new Preset() { Name = vm.Name };
-
-				// If we use the current waymarks, set them in our preset.
-				if (vm.UseCurrentWaymarks)
+				// Create window for add preset.
+				var win = new NewPreset
 				{
-					p.A = GameMemory.A;
-					p.B = GameMemory.B;
-					p.C = GameMemory.C;
-					p.D = GameMemory.D;
-					p.One = GameMemory.One;
-					p.Two = GameMemory.Two;
-					p.MapID = GameMemory.MapID;
-				}
+					// Owner set to MainWindow.
+					Owner = Application.Current.MainWindow
+				};
 
-				// Add the preset.
-				Presets.Add(p);
+				// Get the VM for this window.
+				var vm = win.DataContext as NewPresetViewModel;
+
+				// Show the dialog for the preset window.
+				if (win.ShowDialog() == true)
+				{
+					// Initialize the creation of our preset with the preset name.
+					var p = new Preset() { Name = vm.Name };
+
+					// If we use the current waymarks, set them in our preset.
+					if (vm.UseCurrentWaymarks)
+					{
+						p.A = GameMemory.A;
+						p.B = GameMemory.B;
+						p.C = GameMemory.C;
+						p.D = GameMemory.D;
+						p.One = GameMemory.One;
+						p.Two = GameMemory.Two;
+						p.MapID = GameMemory.MapID;
+					}
+
+					// Add the preset.
+					Presets.Add(p);
+				}
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show("Something happened while creating your preset!", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+				logger.Error(ex, "Exception while adding a new preset.");
 			}
 		}
 
