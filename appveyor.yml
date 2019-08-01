@@ -12,6 +12,7 @@ before_build:
   - nuget restore PaisleyPark.sln
   - nuget restore lib/Nhaama.FFXIV/Nhaama.FFXIV.csproj
   - nuget restore lib/Nhaama.Memory/Nhaama.Memory.csproj
+  - ps: Update-AppveyorBuild -Version "$env:APPVEYOR_REPO_TAG_NAME"
   
 build:
   project: PaisleyPark.sln
