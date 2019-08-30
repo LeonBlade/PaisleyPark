@@ -67,6 +67,10 @@ namespace PaisleyPark.ViewModels
             logger.Info("--- PAISLEY PARK START ---");
             logger.Info("Fetching update.");
 
+			// Deleting any old updater file.
+			if (File.Exists(".PPU.old"))
+				File.Delete(".PPU.old");
+
             // Get the version from the assembly.
             CurrentVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
             // Set window title.
@@ -77,9 +81,6 @@ namespace PaisleyPark.ViewModels
 
 			// Load the settings file.
 			UserSettings = Settings.Load();
-
-			// Get the offsets.
-			GetOffsets();
 
             // Subscribe to the waymark event from the REST server.
             EventAggregator.GetEvent<WaymarkEvent>().Subscribe(waymarks =>
@@ -118,8 +119,8 @@ namespace PaisleyPark.ViewModels
             if (!InitializeNhaama())
                 return false;
 
-            // Inject our code.
-            InjectCode();
+			// Inject our code.
+			InjectCode();
 
             // Check autostart and start the HTTP server if it's true.
             if (UserSettings.HTTPAutoStart)
@@ -311,6 +312,9 @@ namespace PaisleyPark.ViewModels
 				// Fallback to last known version.
                 GameDefinitions = Definitions.Get(GameProcess, "2019.08.21.0000.0000", Game.GameType.Dx11);
             }
+
+			// Get offsets.
+			GetOffsets();
 
             // Create new worker.
             Worker = new BackgroundWorker();
