@@ -70,7 +70,7 @@ namespace PaisleyParkUpdater
 							// Set the update string
 							UpdateString = $"Paisley Park {releaseVersion.VersionString()} is now available, you have {CurrentVersion.VersionString()}. Would you like to download it now?";
 							// Set HTML in the window.
-							HTML = "<style>body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;}</style>" + html;
+							HTML = "<style>body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;ul{margin:0;padding:0;list-style-position:inside;}</style>" + html;
 						}
 						else
 						{

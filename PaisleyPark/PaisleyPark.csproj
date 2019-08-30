@@ -101,7 +101,6 @@
     <Compile Include="ViewModels\NewPresetViewModel.cs" />
     <Compile Include="ViewModels\PresetManagerViewModel.cs" />
     <Compile Include="ViewModels\ProcessSelectorViewModel.cs" />
-    <Compile Include="ViewModels\UpdaterViewModel.cs" />
     <Compile Include="Views\EditPreset.xaml.cs">
       <DependentUpon>EditPreset.xaml</DependentUpon>
     </Compile>
@@ -116,9 +115,6 @@
     </Compile>
     <Compile Include="Views\ProcessSelector.xaml.cs">
       <DependentUpon>ProcessSelector.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Updater.xaml.cs">
-      <DependentUpon>Updater.xaml</DependentUpon>
     </Compile>
     <Page Include="Views\EditPreset.xaml">
       <SubType>Designer</SubType>
@@ -153,10 +149,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\ProcessSelector.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\Updater.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
