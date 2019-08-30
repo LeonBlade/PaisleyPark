@@ -37,9 +37,11 @@ namespace PaisleyPark.ViewModels
         private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
         private NancyHost Host;
         private Thread WaymarkThread;
-        private readonly Offsets Offsets;
+        private Offsets Offsets;
         private readonly Version CurrentVersion;
+		private string GameVersion;
 		public string DiscordUri { get; private set; } = "https://discord.gg/hq3DnBa";
+		private static readonly Uri OffsetUrl = new Uri("https://raw.githubusercontent.com/LeonBlade/PaisleyPark/master/Offsets/");
 
 #pragma warning disable IDE1006 // Naming Styles
 
@@ -73,48 +75,11 @@ namespace PaisleyPark.ViewModels
             // Fetch an update.
             FetchUpdate();
 
-			logger.Info($"Loading Offsets.json from {Environment.CurrentDirectory}");
+			// Load the settings file.
+			UserSettings = Settings.Load();
 
-			// Read the offsets.json file.
-			try
-			{
-				using (var r = new StreamReader(Path.Combine(Environment.CurrentDirectory, "Offsets.json")))
-				{
-					Offsets = JsonConvert.DeserializeObject<Offsets>(r.ReadToEnd());
-				}
-			}
-			catch (Exception)
-			{
-				MessageBox.Show("Couldn't load the offsets file!  Please select the offsets file manually.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-				var dlg = new Microsoft.Win32.OpenFileDialog
-				{
-					InitialDirectory = Environment.CurrentDirectory,
-					DefaultExt = ".json",
-					Filter = "JSON Files (*.json)|*.json|All files (*.*)|*.*"
-				};
-
-				// Show dialog.
-				var result = dlg.ShowDialog();
-
-				if (result == true)
-				{
-					try
-					{
-						using (var r = new StreamReader(dlg.FileName))
-						{
-							Offsets = JsonConvert.DeserializeObject<Offsets>(r.ReadToEnd());
-						}
-					}
-					catch (Exception)
-					{
-						MessageBox.Show("Could not open this offset file. Shutting down.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
-						Application.Current.Shutdown();
-					}
-				}
-			}
-
-            // Load the settings file.
-            UserSettings = Settings.Load();
+			// Get the offsets.
+			GetOffsets();
 
             // Subscribe to the waymark event from the REST server.
             EventAggregator.GetEvent<WaymarkEvent>().Subscribe(waymarks =>
@@ -163,106 +128,112 @@ namespace PaisleyPark.ViewModels
             return true;
         }
 
+		/// <summary>
+		/// Gets the offsets for the program, also checks for a new version for this game version.
+		/// </summary>
+		private void GetOffsets()
+		{
+			// Get the current version of FFXIV.
+			var gameDirectory = new DirectoryInfo(GameProcess.BaseProcess.MainModule.FileName);
+			GameVersion = File.ReadAllText(Path.Combine(gameDirectory.Parent.FullName, "ffxivgame.ver"));
+
+			logger.Debug($"Game version is {GameVersion}");
+
+			// Check the game version against what we have saved in settings.
+			if (UserSettings.LatestGameVersion != GameVersion)
+			{
+				logger.Info($"Latest version {GameVersion} does not match the latest game version in settings {UserSettings.LatestGameVersion}");
+
+				var result = MessageBox.Show("There are new offsets available from the web. Would you like to use these offsets?", "Paisley Park", MessageBoxButton.YesNo, MessageBoxImage.Question);
+				if (result == MessageBoxResult.Yes)
+				{
+					logger.Info("User is downloading latest offsets.");
+					// Create client to fetch latest version of offsets.
+					try
+					{
+						using (var client = new WebClient())
+						{
+							// Form the URI for the game version's offsets file.
+							var uri = new Uri(OffsetUrl, $"{GameVersion}.json");
+							// Write the JSON to the disk overwriting the Offsets.json file used locally.
+							File.WriteAllText(Path.Combine(Environment.CurrentDirectory, "Offsets.json"), client.DownloadString(uri));
+							// Set the lateste version to the version downloaded.
+							UserSettings.LatestGameVersion = GameVersion;
+							// Save the settings.
+							Settings.Save(UserSettings);
+						}
+					}
+					catch (Exception ex)
+					{
+						MessageBox.Show("Couldn't fetch or save offsets from the server. Your offsets could be out of date, and if so, may cause the game to crash.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+						logger.Error(ex, "Couldn't fetch or save offsets from the server!");
+					}
+				}
+			}
+
+			// Read the offsets.json file.
+			try
+			{
+				using (var r = new StreamReader(Path.Combine(Environment.CurrentDirectory, "Offsets.json")))
+				{
+					Offsets = JsonConvert.DeserializeObject<Offsets>(r.ReadToEnd());
+				}
+			}
+			catch (Exception)
+			{
+				MessageBox.Show("Couldn't load the offsets file!  Please select the offsets file manually.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+				var dlg = new Microsoft.Win32.OpenFileDialog
+				{
+					InitialDirectory = Environment.CurrentDirectory,
+					DefaultExt = ".json",
+					Filter = "JSON Files (*.json)|*.json|All files (*.*)|*.*"
+				};
+
+				// Show dialog.
+				var result = dlg.ShowDialog();
+
+				if (result == true)
+				{
+					try
+					{
+						using (var r = new StreamReader(dlg.FileName))
+						{
+							Offsets = JsonConvert.DeserializeObject<Offsets>(r.ReadToEnd());
+						}
+					}
+					catch (Exception)
+					{
+						MessageBox.Show("Could not open this offset file. Shutting down.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+						Application.Current.Shutdown();
+					}
+				}
+			}
+		}
+
         /// <summary>
         /// Fetch an update for the applicaton.
         /// </summary>
         private void FetchUpdate()
         {
-            logger.Info("Fetching update.");
-
-            // Create request for Github REST API for the latest release of Paisley Park.
-            if (WebRequest.Create("https://api.github.com/repos/LeonBlade/PaisleyPark/releases/latest") is HttpWebRequest request)
-            {
-                request.Method = "GET";
-                request.UserAgent = "PaisleyPark";
-                request.ServicePoint.Expect100Continue = false;
-
-                try
-                {
-                    using (var r = new StreamReader(request.GetResponse().GetResponseStream()))
-                    {
-                        // Get the JSON as a JObject to get the properties dynamically.
-                        var json = JsonConvert.DeserializeObject<JObject>(r.ReadToEnd());
-                        // Get tag name and remove the v in front.
-                        var tag_name = json["tag_name"].Value<string>().Substring(1);
-                        // Form release version from this string.
-                        var releaseVersion = new Version(tag_name);
-                        // Check if the release is newer.
-                        if (releaseVersion > CurrentVersion)
-                        {
-                            // Create update window.
-                            var updateWindow = new Updater();
-                            // Get the view model.
-                            var vm = updateWindow.DataContext as UpdaterViewModel;
-                            // Create HTML out of the markdown in body.
-                            var html = Markdown.ToHtml(json["body"].Value<string>());
-                            // Set the update string
-                            vm.UpdateString = $"Paisley Park {releaseVersion.VersionString()} is now available, you have {CurrentVersion.VersionString()}. Would you like to download it now?";
-                            // Set HTML in the window.
-                            vm.HTML = html;
-
-                            // We want to install.
-                            if (updateWindow.ShowDialog() == true)
-                            {
-                                using (var wc = new WebClient())
-                                {
-                                    // Delete existing zip file.
-                                    if (File.Exists("PaisleyPark.zip"))
-                                        File.Delete("PaisleyPark.zip");
-
-                                    // Download the file. 
-                                    wc.DownloadFile(new Uri(json["assets"][0]["browser_download_url"].Value<string>()), "PaisleyPark.zip");
-
-                                    // Get temp path for update script to run on.
-                                    var temp = Path.Combine(Path.GetTempPath(), "PaisleyPark");
-
-                                    // Create temp diretory if it doesn't exist.
-                                    if (!Directory.Exists(temp))
-                                        Directory.CreateDirectory(temp);
-
-                                    // Temp update file location.
-                                    var script = Path.Combine(temp, "update.ps1");
-
-                                    // Delete existing script just in case.
-                                    if (File.Exists(script))
-                                        File.Delete(script);
-
-                                    // Copy the update script to the temp path.
-                                    File.Copy(@".\update.ps1", script);
-
-                                    // Run the update script.
-                                    Process.Start("powershell.exe", $"{script} \"{Environment.CurrentDirectory}\"");
-                                }                                
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    UpdateFailed(ex);
-                }
-            }
-            else
-            {
-                UpdateFailed();
-            }
-
-            // Used for when update fails.
-            void UpdateFailed(Exception ex = null)
-            {
-                var answer = MessageBox.Show(
-                    "Unable to fetch the latest release of Paisley Park.  Would you like to visit the release page?",
-                    "Paisley Park",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Error
-                );
-                if (answer == MessageBoxResult.Yes)
-                {
-                    Process.Start("https://github.com/LeonBlade/PaisleyPark/releases/latest");
-                }
-
-                logger.Error(ex, "Update failed when requesting update from Github.");
-            }
+			try
+			{
+				Process.Start("PaisleyParkUpdater.exe");
+			}
+			catch (Exception ex)
+			{
+				logger.Error(ex, "Updater didn't work.");
+				var result = MessageBox.Show(
+					"Could not run the updater. Would you like to visit the releases page to check for a new update manually?", 
+					"Paisley Park",
+					MessageBoxButton.YesNo, 
+					MessageBoxImage.Error
+				);
+				// Launch the web browser to the latest release.
+				if (result == MessageBoxResult.Yes)
+				{
+					Process.Start("https://github.com/LeonBlade/PaisleyPark/releases/latest");
+				}
+			}
         }
 
 		/// <summary>
@@ -335,10 +306,10 @@ namespace PaisleyPark.ViewModels
             {
                 GameDefinitions = Definitions.Get(GameProcess, gameVersion.ToString(), Game.GameType.Dx11);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                GameDefinitions = Definitions.Get(GameProcess, "2019.07.10.0001.0000", Game.GameType.Dx11);
-                Console.WriteLine(ex);
+				// Fallback to last known version.
+                GameDefinitions = Definitions.Get(GameProcess, "2019.08.21.0000.0000", Game.GameType.Dx11);
             }
 
             // Create new worker.
@@ -444,8 +415,6 @@ namespace PaisleyPark.ViewModels
                     "add rsp, 40",          // move stack pointer back
                     "ret"
                 }), _newmem.AsHex(), waymarkClassPointer.AsHex(), waymarkFunc.AsHex());
-
-                logger.Debug("Assembly to inject:\n{0}", asm);
 
                 // Get bytes from AsmjitCSharp.
                 var bytes = AsmjitCSharp.Assemble(asm);
@@ -612,7 +581,7 @@ namespace PaisleyPark.ViewModels
             {
                 // Ask the user if they want to still place based on the XYZ being all 0.
                 var result = MessageBox.Show(
-                    "It appears you might not be loaded into a zone yet. Placing Waymarks in this state will crash the game. Are you sure you want to do this?",
+                    "There is a problem loading your current position, this may cause crashing. Are you sure you want to do this?",
                     "Paisley Park",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Warning

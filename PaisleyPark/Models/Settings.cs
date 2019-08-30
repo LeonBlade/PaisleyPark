@@ -23,6 +23,11 @@ namespace PaisleyPark.Models
 		private static readonly string SETTINGS_FILE = "settings.json";
 
 		/// <summary>
+		/// The latest game version known.
+		/// </summary>
+		public string LatestGameVersion { get; set; }
+
+		/// <summary>
 		/// Path to the game to use for various functions.
 		/// </summary>
 		public string GamePath { get; set; }
