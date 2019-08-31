@@ -92,47 +92,47 @@ namespace PaisleyPark.ViewModels
 				WriteWaymark(waymarks.Two, 5);
 			});
 
-            // Subscribe to the load preset event from the REST server.
-            EventAggregator.GetEvent<LoadPresetEvent>().Subscribe(name =>
-            {
-                var preset = this.UserSettings.Presets.FirstOrDefault(x =>
-                    string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
+			// Subscribe to the load preset event from the REST server.
+			EventAggregator.GetEvent<LoadPresetEvent>().Subscribe(name =>
+			{
+				var preset = UserSettings.Presets.FirstOrDefault(x =>
+					string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
 
-                if (preset == null) 
-                { 
-                    logger.Info($"Unkown preset {name}.");
-                    return;
-                }
+				if (preset == null)
+				{
+					logger.Info($"Unkown preset {name}.");
+					return;
+				}
 
-                WriteWaymark(preset.A, 0);
-                WriteWaymark(preset.B, 1);
-                WriteWaymark(preset.C, 2);
-                WriteWaymark(preset.D, 3);
-                WriteWaymark(preset.One, 4);
-                WriteWaymark(preset.Two, 5);
-            });
+				WriteWaymark(preset.A, 0);
+				WriteWaymark(preset.B, 1);
+				WriteWaymark(preset.C, 2);
+				WriteWaymark(preset.D, 3);
+				WriteWaymark(preset.One, 4);
+				WriteWaymark(preset.Two, 5);
+			});
 
-            // Subscribe to the save preset event from the REST server.
-            EventAggregator.GetEvent<SavePresetEvent>().Subscribe(name =>
-            {
-                var preset = this.UserSettings.Presets.FirstOrDefault(x =>
-                    string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
+			// Subscribe to the save preset event from the REST server.
+			EventAggregator.GetEvent<SavePresetEvent>().Subscribe(name =>
+			{
+				var preset = UserSettings.Presets.FirstOrDefault(x =>
+					string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
 
-                if (preset == null) 
-                { 
-                    preset = new Preset(); 
-                    this.UserSettings.Presets.Add(preset); 
-                }
+				if (preset == null)
+				{
+					preset = new Preset();
+					UserSettings.Presets.Add(preset);
+				}
 
-                preset.Name = name;
-                preset.A = GameMemory.A;
-                preset.B = GameMemory.B;
-                preset.C = GameMemory.C;
-                preset.D = GameMemory.D;
-                preset.One = GameMemory.One;
-                preset.Two = GameMemory.Two; 
-                preset.MapID = GameMemory.MapID;
-            });
+				preset.Name = name;
+				preset.A = GameMemory.A;
+				preset.B = GameMemory.B;
+				preset.C = GameMemory.C;
+				preset.D = GameMemory.D;
+				preset.One = GameMemory.One;
+				preset.Two = GameMemory.Two;
+				preset.MapID = GameMemory.MapID;
+			});
 
 			// Create the commands.
 			LoadPresetCommand = new DelegateCommand(LoadPreset);
