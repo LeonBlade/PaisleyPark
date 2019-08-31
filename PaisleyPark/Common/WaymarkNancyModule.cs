@@ -43,6 +43,46 @@ namespace PaisleyPark.Common
                 // Serialize and return the response.
                 return JsonConvert.SerializeObject(response);
             };
+
+            Get["/preset/{name}/load"] = data =>
+            {
+
+                var name = data.name;
+
+                if (string.IsNullOrEmpty(name))
+
+                {
+
+                    return null;
+                }
+
+                var e = MainWindowViewModel.EventAggregator.GetEvent<LoadPresetEvent>();
+                e?.Publish(name);
+
+                return null;
+
+            };
+
+            Post["/preset/{name}/save"] = data =>
+            {
+
+                var name = data.name;
+
+                if (string.IsNullOrEmpty(name))
+
+                {
+
+                    return null;
+                }
+
+                var e = MainWindowViewModel.EventAggregator.GetEvent<SavePresetEvent>();
+                e?.Publish(name);
+
+                return null;
+
+            };
         }
     }
 }
+
+
