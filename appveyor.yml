@@ -1,6 +1,8 @@
 configuration: Release
 platform: x64
 
+skip_non_tags: true
+
 image:
   - Visual Studio 2019
   
