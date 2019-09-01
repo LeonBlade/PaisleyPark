@@ -46,13 +46,11 @@ namespace PaisleyPark.Common
 
             Get["/preset/{name}/load"] = data =>
             {
-
                 var name = data.name;
 
                 if (string.IsNullOrEmpty(name))
 
                 {
-
                     return null;
                 }
 
@@ -60,18 +58,15 @@ namespace PaisleyPark.Common
                 e?.Publish(name);
 
                 return null;
-
             };
 
             Post["/preset/{name}/save"] = data =>
             {
-
                 var name = data.name;
 
                 if (string.IsNullOrEmpty(name))
 
                 {
-
                     return null;
                 }
 
@@ -79,10 +74,7 @@ namespace PaisleyPark.Common
                 e?.Publish(name);
 
                 return null;
-
             };
         }
     }
 }
-
-
