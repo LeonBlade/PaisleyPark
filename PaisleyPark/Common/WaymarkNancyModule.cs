@@ -44,34 +44,30 @@ namespace PaisleyPark.Common
                 return JsonConvert.SerializeObject(response);
             };
 
-            Get["/preset/{name}/load"] = data =>
-            {
+			Post["/preset/{name}/load"] = data => Load(data);
+			Get["/preset/{name}/load"] = data => Load(data);
 
-                var name = data.name;
+			dynamic Load(dynamic data)
+			{
+				var name = data.name;
 
-                if (string.IsNullOrEmpty(name))
+				if (string.IsNullOrEmpty(name))
+				{
+					return null;
+				}
 
-                {
+				var e = MainWindowViewModel.EventAggregator.GetEvent<LoadPresetEvent>();
+				e?.Publish(name);
 
-                    return null;
-                }
-
-                var e = MainWindowViewModel.EventAggregator.GetEvent<LoadPresetEvent>();
-                e?.Publish(name);
-
-                return null;
-
-            };
+				return null;
+			}
 
             Post["/preset/{name}/save"] = data =>
             {
-
                 var name = data.name;
 
                 if (string.IsNullOrEmpty(name))
-
                 {
-
                     return null;
                 }
 
@@ -79,7 +75,6 @@ namespace PaisleyPark.Common
                 e?.Publish(name);
 
                 return null;
-
             };
         }
     }

@@ -118,10 +118,18 @@ namespace PaisleyPark.ViewModels
 				var preset = UserSettings.Presets.FirstOrDefault(x =>
 					string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
 
-				if (preset == null)
+				try
 				{
-					preset = new Preset();
-					UserSettings.Presets.Add(preset);
+					if (preset == null)
+					{
+						preset = new Preset();
+						Application.Current.Dispatcher.Invoke(() => UserSettings.Presets.Add(preset));
+					}
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show("Could not save the preset.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+					logger.Error(ex, "Could not save preset");
 				}
 
 				preset.Name = name;
@@ -132,6 +140,8 @@ namespace PaisleyPark.ViewModels
 				preset.One = GameMemory.One;
 				preset.Two = GameMemory.Two;
 				preset.MapID = GameMemory.MapID;
+
+				Settings.Save(UserSettings);
 			});
 
 			// Create the commands.
