@@ -1,6 +1,8 @@
-﻿using PaisleyPark.Views;
+using PaisleyPark.Views;
 using Prism.Ioc;
 using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace PaisleyPark
@@ -18,6 +20,7 @@ namespace PaisleyPark
 
 		protected override void OnStartup(StartupEventArgs e)
 		{
+			RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
 			Current.DispatcherUnhandledException += Application_DispatcherUnhandledException;
 			base.OnStartup(e);
 		}
