@@ -88,10 +88,20 @@ namespace PaisleyPark.Models
 			// Get the full path to the settings file.
 			var fullPath = Path.Combine(SETTINGS_FOLDER, SETTINGS_FILE);
 
-			// Store three backups 
-			File.Copy(fullPath + "2.bak", fullPath + "3.bak");
-			File.Copy(fullPath + "1.bak", fullPath + "2.bak");
-			File.Copy(fullPath, fullPath + "1.bak");
+			try
+			{
+				// Store three backups 
+				if (File.Exists(fullPath + "2.bak"))
+					File.Copy(fullPath + "2.bak", fullPath + "3.bak");
+				if (!File.Exists(fullPath + "1.bak"))
+					File.Copy(fullPath + "1.bak", fullPath + "2.bak");
+				File.Copy(fullPath, fullPath + "1.bak");
+			}
+			catch (Exception ex)
+			{
+				logger.Error(ex, "Couldn't create backups.");
+				MessageBox.Show("Couldn't create save backups.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Warning);
+			}
 
 			// Create StreamWriter instance to save file contents into full path.
 			using (var text = File.CreateText(fullPath))
