@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Windows;
 
 namespace PaisleyPark.Models
 {
@@ -63,17 +64,34 @@ namespace PaisleyPark.Models
 		public ObservableCollection<Preset> Presets { get; set; } = new ObservableCollection<Preset>();
 
 		/// <summary>
+		/// Class logger.
+		/// </summary>
+		private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+
+		/// <summary>
 		/// Saves the settings to the file.
 		/// </summary>
 		/// <param name="settings">Settings to save to the user file.</param>
 		public static void Save(Settings settings)
 		{
+			if (settings == null)
+			{
+				logger.Error("Settings save is null!");
+				MessageBox.Show("Cannot save settings as it would become corrupt!", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+				throw new Exception("Settings passed is null");
+			}
+
 			// Does the settings folder exist?  If not, create Settings folder.
 			if (!Directory.Exists(SETTINGS_FOLDER))
 				Directory.CreateDirectory(SETTINGS_FOLDER);
 
 			// Get the full path to the settings file.
 			var fullPath = Path.Combine(SETTINGS_FOLDER, SETTINGS_FILE);
+
+			// Store three backups 
+			File.Copy(fullPath + "2.bak", fullPath + "3.bak");
+			File.Copy(fullPath + "1.bak", fullPath + "2.bak");
+			File.Copy(fullPath, fullPath + "1.bak");
 
 			// Create StreamWriter instance to save file contents into full path.
 			using (var text = File.CreateText(fullPath))
@@ -90,7 +108,7 @@ namespace PaisleyPark.Models
 		public static Settings Load()
 		{
 			// Create the return value.
-			Settings settings = new Settings();
+			var settings = new Settings();
 
 			// Does the settings folder exist?  If not, create Settings folder.
 			if (!Directory.Exists(SETTINGS_FOLDER))
@@ -102,6 +120,14 @@ namespace PaisleyPark.Models
 			// Does the settings file exist?  If so, load the file into the settings object.
 			if (File.Exists(fullPath))
 				settings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText(fullPath));
+
+			if (settings == null)
+			{
+				logger.Error("Current settings file is corrupt!");
+				File.Copy(fullPath, fullPath + ".bak");
+				MessageBox.Show("Your settings file is corrupt, a new settings file is being created. You may attempt to restore settings from backups.  Please ask in Discord if you have questions.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Warning);
+				settings = new Settings();
+			}
 
 			// Return our settings.
 			return settings;

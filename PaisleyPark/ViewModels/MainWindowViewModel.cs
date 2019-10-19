@@ -30,8 +30,8 @@ namespace PaisleyPark.ViewModels
 		public static Memory GameMemory { get; set; } = new Memory();
 		public Settings UserSettings { get; set; }
 		public Preset CurrentPreset { get; set; }
-		public string WindowTitle { get; set; }
-		public bool IsServerStarted { get; set; }
+		public string WindowTitle { get; set; } = "Paisley Park";
+		public bool IsServerStarted { get; set; } = false;
 		public bool IsServerStopped { get => !IsServerStarted; }
 		private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 		private NancyHost Host;
@@ -60,27 +60,57 @@ namespace PaisleyPark.ViewModels
 
 		public MainWindowViewModel(IEventAggregator ea)
 		{
+			// Test if the Event Aggregator is null.
+			if (ea == null)
+			{
+				MessageBox.Show("Event Aggregator is null, unable to start.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+				logger.Error("Event Aggregator is null");
+				Application.Current.Shutdown();
+			}
+
 			// Store reference to the event aggregator.
 			EventAggregator = ea;
 
 			logger.Info("--- PAISLEY PARK START ---");
-			logger.Info("Fetching update.");
 
 			// Deleting any old updater file.
 			if (File.Exists(".PPU.old"))
 				File.Delete(".PPU.old");
 
-			// Get the version from the assembly.
-			CurrentVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-			// Set window title.
-			WindowTitle = string.Format("Paisley Park {0}", CurrentVersion.VersionString());
+			try
+			{
+				// Get the version from the assembly.
+				CurrentVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+				logger.Debug($"Current Version: {CurrentVersion}");
+
+				// Set window title.
+				WindowTitle = string.Format("Paisley Park {0}", CurrentVersion.VersionString());
+			}
+			catch (Exception ex)
+			{
+				logger.Error(ex, "Couldn't get the application version.");
+				MessageBox.Show("Couldn't get Paisley Park's version to set the title.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+				WindowTitle = "Paisley Park";
+			}
 
 			// Fetch an update.
+			logger.Info("Fetching update...");
 			FetchUpdate();
 
 			// Load the settings file.
-			UserSettings = Settings.Load();
+			logger.Info("Loading settings...");
+			try
+			{
+				UserSettings = Settings.Load();
+			}
+			catch (Exception ex)
+			{
+				logger.Error(ex, "Error trying to load settings file.");
+				MessageBox.Show("Could not load your settings file!", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+				Application.Current.Shutdown();
+			}
 
+			logger.Debug("Setting up the events.");
 			// Subscribe to the waymark event from the REST server.
 			EventAggregator.GetEvent<WaymarkEvent>().Subscribe(waymarks =>
 			{
@@ -92,72 +122,111 @@ namespace PaisleyPark.ViewModels
 				WriteWaymark(waymarks.Two, 5);
 			});
 
-			// Subscribe to the load preset event from the REST server.
-			EventAggregator.GetEvent<LoadPresetEvent>().Subscribe(name =>
+			logger.Debug("Subscribing to Load Preset event.");
+			try
 			{
-				var preset = UserSettings.Presets.FirstOrDefault(x =>
-					string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
-
-				if (preset == null)
+				// Subscribe to the load preset event from the REST server.
+				var loadPresetEvent = EventAggregator.GetEvent<LoadPresetEvent>();
+				if (loadPresetEvent == null)
+					throw new Exception("Couldn't get LoadPresetEvent");
+				loadPresetEvent.Subscribe(name =>
 				{
-					logger.Info($"Unkown preset {name}.");
-					return;
-				}
+					var preset = UserSettings.Presets.FirstOrDefault(x =>
+						string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
 
-				WriteWaymark(preset.A, 0);
-				WriteWaymark(preset.B, 1);
-				WriteWaymark(preset.C, 2);
-				WriteWaymark(preset.D, 3);
-				WriteWaymark(preset.One, 4);
-				WriteWaymark(preset.Two, 5);
-			});
-
-			// Subscribe to the save preset event from the REST server.
-			EventAggregator.GetEvent<SavePresetEvent>().Subscribe(name =>
-			{
-				var preset = UserSettings.Presets.FirstOrDefault(x =>
-					string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
-
-				try
-				{
 					if (preset == null)
 					{
-						preset = new Preset();
-						Application.Current.Dispatcher.Invoke(() => UserSettings.Presets.Add(preset));
+						logger.Info($"Unkown preset {name}.");
+						return;
 					}
-				}
-				catch (Exception ex)
+
+					WriteWaymark(preset.A, 0);
+					WriteWaymark(preset.B, 1);
+					WriteWaymark(preset.C, 2);
+					WriteWaymark(preset.D, 3);
+					WriteWaymark(preset.One, 4);
+					WriteWaymark(preset.Two, 5);
+				});
+			}
+			catch (Exception ex)
+			{
+				logger.Error(ex, "Couldn't subscribe to LoadPresetEvent.");
+				MessageBox.Show("Couldn't subscribe to Load Preset event.", "Paisely Park", MessageBoxButton.OK, MessageBoxImage.Error);
+				Application.Current.Shutdown();
+			}
+
+			logger.Debug("Subscribing to Save Preset event.");
+			try
+			{
+				// Subscribe to the save preset event from the REST server.
+				var savePresetEvent = EventAggregator.GetEvent<SavePresetEvent>();
+				if (savePresetEvent == null)
+					throw new Exception("Couldn't get SavePresetEvent");
+				savePresetEvent.Subscribe(name =>
 				{
-					MessageBox.Show("Could not save the preset.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
-					logger.Error(ex, "Could not save preset");
-				}
+					var preset = UserSettings.Presets.FirstOrDefault(x =>
+						string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
 
-				preset.Name = name;
-				preset.A = GameMemory.A;
-				preset.B = GameMemory.B;
-				preset.C = GameMemory.C;
-				preset.D = GameMemory.D;
-				preset.One = GameMemory.One;
-				preset.Two = GameMemory.Two;
-				preset.MapID = GameMemory.MapID;
+					try
+					{
+						if (preset == null)
+						{
+							preset = new Preset();
+							Application.Current.Dispatcher.Invoke(() => UserSettings.Presets.Add(preset));
+						}
+					}
+					catch (Exception ex)
+					{
+						MessageBox.Show("Could not save the preset.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+						logger.Error(ex, "Could not save preset");
+					}
 
-				Settings.Save(UserSettings);
-			});
+					preset.Name = name;
+					preset.A = GameMemory.A;
+					preset.B = GameMemory.B;
+					preset.C = GameMemory.C;
+					preset.D = GameMemory.D;
+					preset.One = GameMemory.One;
+					preset.Two = GameMemory.Two;
+					preset.MapID = GameMemory.MapID;
 
-			// Create the commands.
-			LoadPresetCommand = new DelegateCommand(LoadPreset);
-			ClosingCommand = new DelegateCommand(OnClose);
-			ManagePresetsCommand = new DelegateCommand(OnManagePresets);
-			StartServerCommand = new DelegateCommand(OnStartServer).ObservesCanExecute(() => IsServerStopped);
-			StopServerCommand = new DelegateCommand(OnStopServer).ObservesCanExecute(() => IsServerStarted);
-			DiscordCommand = new DelegateCommand(OnDiscord);
+					Settings.Save(UserSettings);
+				});
+			}
+			catch (Exception ex)
+			{
+				logger.Error(ex, "Couldn't subscribe to SavePresetEvent.");
+				MessageBox.Show("Couldn't subscribe to Save Preset event.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+				Application.Current.Shutdown();
+			}
+
+			logger.Debug("Creating commands.");
+			try
+			{
+				// Create the commands.
+				LoadPresetCommand = new DelegateCommand(LoadPreset);
+				ClosingCommand = new DelegateCommand(OnClose);
+				ManagePresetsCommand = new DelegateCommand(OnManagePresets);
+				StartServerCommand = new DelegateCommand(OnStartServer).ObservesCanExecute(() => IsServerStopped);
+				StopServerCommand = new DelegateCommand(OnStopServer).ObservesCanExecute(() => IsServerStarted);
+				DiscordCommand = new DelegateCommand(OnDiscord);
+			}
+			catch (Exception ex)
+			{
+				logger.Error(ex, "Couldn't create a command.");
+				MessageBox.Show("Couldn't create commands.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+				Application.Current.Shutdown();
+			}
 
 			// Listen for property changed.
 			UserSettings.PropertyChanged += OnPropertyChanged;
 
+			logger.Info("Initializing...");
 			// Prepare for new game launch.
 			if (!Initialize())
-				return;
+			{
+				Application.Current.Shutdown();
+			}
 		}
 
 		/// <summary>
@@ -166,13 +235,16 @@ namespace PaisleyPark.ViewModels
 		/// <returns>Successful initialization.</returns>
 		private bool Initialize()
 		{
+			logger.Info("Initializing Nhaama...");
 			// Initialize Nhaama.
 			if (!InitializeNhaama())
 				return false;
 
+			logger.Info("Injecting code...");
 			// Inject our code.
 			InjectCode();
 
+			logger.Info("Starting server...");
 			// Check autostart and start the HTTP server if it's true.
 			if (UserSettings.HTTPAutoStart)
 				OnStartServer();
@@ -306,8 +378,16 @@ namespace PaisleyPark.ViewModels
 			// When specific properties change we save them immediately.
 			if (e.PropertyName == "PlacementDelay" || e.PropertyName == "Port" || e.PropertyName == "HTTPAutoStart")
 			{
-				// Save the settings file.
-				Settings.Save(UserSettings);
+				try
+				{
+					// Save the settings file.
+					Settings.Save(UserSettings);
+				}
+				catch (Exception ex)
+				{
+					logger.Error(ex, "Couldn't save settings");
+					MessageBox.Show("Couldn't save settings!", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+				}
 			}
 		}
 
@@ -330,6 +410,13 @@ namespace PaisleyPark.ViewModels
 				// Get the Nhaama process from the first process that matches for XIV.
 				GameProcess = procs[0].GetNhaamaProcess();
 
+			if (GameProcess == null)
+			{
+				logger.Error("Couldn't get Nhaama process");
+				MessageBox.Show("Coult not get the Nhaama Process for FFXIV.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+				return false;
+			}
+
 			// Enable raising events.
 			GameProcess.BaseProcess.EnableRaisingEvents = true;
 
@@ -345,27 +432,37 @@ namespace PaisleyPark.ViewModels
 				logger.Info("FFXIV Shutdown or Crashed!");
 
 				// Start the initialization process again.
-				Application.Current.Dispatcher.Invoke(() => { Initialize(); });
+				Application.Current.Dispatcher.Invoke(() => Initialize());
 			};
 
-			// Get FFXIV game folder.
-			var ffxiv_folder = Path.GetDirectoryName(GameProcess.BaseProcess.MainModule.FileName);
-			// Read the version file.
-			var gameVersion = File.ReadAllLines(Path.Combine(ffxiv_folder, "ffxivgame.ver"))[0];
+			// Initialize as an empty string.
+			string gameVersion = "";
+			string ffxiv_folder = "";
+
+			try
+			{
+				// Get FFXIV game folder.
+				ffxiv_folder = Path.GetDirectoryName(GameProcess.BaseProcess.MainModule.FileName);
+				// Read the version file.
+				gameVersion = File.ReadAllLines(Path.Combine(ffxiv_folder, "ffxivgame.ver"))[0];
+			}
+			catch (Exception ex)
+			{
+				logger.Error(ex, $"There is an error getting your FFXIV game version. {ffxiv_folder}");
+				MessageBox.Show("There was a problem getting your game version, cannot start!", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+				Application.Current.Shutdown();
+			}
 
 			// Load in the definitions file.
 			try
 			{
-				GameDefinitions = Definitions.Get(GameProcess, gameVersion.ToString(), Game.GameType.Dx11);
+				GameDefinitions = Definitions.Get(GameProcess, gameVersion, Game.GameType.Dx11);
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
-				// Adding this for a weird bug by someone this is only temporary, don't bother maintaining this.
-				using (var w = new WebClient())
-				{
-					var json = w.DownloadString("https://gist.githubusercontent.com/LeonBlade/536c942a372b33652a3338ed96c31a90/raw/0108862968cc89fc871602341ef9601e3ba0ef50/2019.08.21.0000.0000.json");
-					GameDefinitions = GameProcess.GetSerializer().DeserializeObject<Definitions>(json);
-				}
+				MessageBox.Show("Couldn't fetch latest definitions for Nhaama.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+				logger.Error(ex, "Couldn't fetch or save offsets from the server!");
+				return false;
 			}
 
 			// Get offsets.
