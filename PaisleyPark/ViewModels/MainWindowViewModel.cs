@@ -360,8 +360,12 @@ namespace PaisleyPark.ViewModels
 			}
 			catch (Exception)
 			{
-				// Fallback to last known version.
-				GameDefinitions = Definitions.Get(GameProcess, "2019.08.21.0000.0000", Game.GameType.Dx11);
+				// Adding this for a weird bug by someone this is only temporary, don't bother maintaining this.
+				using (var w = new WebClient())
+				{
+					var json = w.DownloadString("https://gist.githubusercontent.com/LeonBlade/536c942a372b33652a3338ed96c31a90/raw/0108862968cc89fc871602341ef9601e3ba0ef50/2019.08.21.0000.0000.json");
+					GameDefinitions = GameProcess.GetSerializer().DeserializeObject<Definitions>(json);
+				}
 			}
 
 			// Get offsets.
