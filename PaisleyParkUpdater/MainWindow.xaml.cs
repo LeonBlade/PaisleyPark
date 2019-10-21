@@ -74,7 +74,7 @@ namespace PaisleyParkUpdater
 						}
 						else
 						{
-							MessageBox.Show("You're up to date!", "Paisley Park Updater", MessageBoxButton.OK, MessageBoxImage.Information);
+							// MessageBox.Show("You're up to date!", "Paisley Park Updater", MessageBoxButton.OK, MessageBoxImage.Information);
 							Application.Current.Shutdown();
 						}
 					}
