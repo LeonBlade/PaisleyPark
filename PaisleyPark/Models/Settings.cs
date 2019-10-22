@@ -90,12 +90,16 @@ namespace PaisleyPark.Models
 
 			try
 			{
+				var b3 = fullPath + ".3.bak";
+				var b2 = fullPath + ".2.bak";
+				var b1 = fullPath + ".1.bak";
+
 				// Store three backups 
-				if (File.Exists(fullPath + ".2.bak"))
-					File.Copy(fullPath + ".2.bak", fullPath + ".3.bak");
-				if (File.Exists(fullPath + ".1.bak"))
-					File.Copy(fullPath + ".1.bak", fullPath + ".2.bak");
-				File.Copy(fullPath, fullPath + ".1.bak");
+				if (File.Exists(b2))
+					File.Copy(b2, b3, true);
+				if (File.Exists(b1))
+					File.Copy(b1, b2, true);
+				File.Copy(fullPath, b1, true);
 			}
 			catch (Exception ex)
 			{
