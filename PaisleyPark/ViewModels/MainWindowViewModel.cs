@@ -612,7 +612,7 @@ namespace PaisleyPark.ViewModels
 			{
 				// Pointers for player position, start of the actor table (first actor in the table is you)
 				// NOTE: needs to be addressed in the loop because it changes dynamically.
-				var playerPosition = new Pointer(GameProcess, Offsets.ActorTable + 0x8, 0xF0, 0x50);
+				var playerPosition = new Pointer(GameProcess, (ulong)Offsets.ActorTable + 0x8, 0xF0, 0x50);
 
 				// Supporting cancellation.
 				if (Worker.CancellationPending)
