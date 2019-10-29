@@ -25,7 +25,6 @@ namespace PaisleyPark.ViewModels
 	{
 		public static IEventAggregator EventAggregator { get; private set; }
 		private NhaamaProcess GameProcess { get; set; }
-		private Definitions GameDefinitions { get; set; }
 		private BackgroundWorker Worker;
 		public static Memory GameMemory { get; set; } = new Memory();
 		public Settings UserSettings { get; set; }
@@ -453,18 +452,6 @@ namespace PaisleyPark.ViewModels
 				Application.Current.Shutdown();
 			}
 
-			// Load in the definitions file.
-			try
-			{
-				GameDefinitions = Definitions.Get(GameProcess, gameVersion, Game.GameType.Dx11);
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show("Couldn't fetch latest definitions for Nhaama.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
-				logger.Error(ex, "Couldn't fetch or save offsets from the server!");
-				return false;
-			}
-
 			// Get offsets.
 			GetOffsets();
 
@@ -625,7 +612,7 @@ namespace PaisleyPark.ViewModels
 			{
 				// Pointers for player position, start of the actor table (first actor in the table is you)
 				// NOTE: needs to be addressed in the loop because it changes dynamically.
-				var playerPosition = new Pointer(GameProcess, GameDefinitions.ActorTable + 0x8, 0xF0, 0x50);
+				var playerPosition = new Pointer(GameProcess, Offsets.ActorTable + 0x8, 0xF0, 0x50);
 
 				// Supporting cancellation.
 				if (Worker.CancellationPending)
