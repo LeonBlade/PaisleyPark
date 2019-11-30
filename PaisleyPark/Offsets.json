@@ -1,6 +1,6 @@
 {
-  "WaymarkClassPtr": 28730672, // 1B66530
-  "WaymarkFunc": 7739280, // 761790
-  "Waymarks": 28731088, // 1B666D0
-  "MapID": 222 // 333
+  "WaymarkClassPtr": 29583936, // 1C36A40
+  "WaymarkFunc": 7958672, // 797090
+  "Waymarks": 29584352, // 1C36BE0
+  "ActorTable": 29347216 // 1BFCD90
 }
