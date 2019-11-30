@@ -31,7 +31,7 @@ namespace PaisleyPark.Models
 		/// <summary>
 		/// Path to the game to use for various functions.
 		/// </summary>
-		public string GamePath { get; set; }
+		// public string GamePath { get; set; }
 
         /// <summary>
         /// Port for HTTP server.

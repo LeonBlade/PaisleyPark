@@ -67,6 +67,9 @@ namespace PaisleyPark.ViewModels
 				Application.Current.Shutdown();
 			}
 
+			// Set the security protocol, mainly for Windows 7 users.
+			ServicePointManager.SecurityProtocol = (ServicePointManager.SecurityProtocol & SecurityProtocolType.Ssl3) | (SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12);
+
 			// Store reference to the event aggregator.
 			EventAggregator = ea;
 
