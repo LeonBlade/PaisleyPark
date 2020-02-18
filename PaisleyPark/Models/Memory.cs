@@ -28,6 +28,8 @@ namespace PaisleyPark.Models
 		public Waymark D { get; set; }
 		public Waymark One { get; set; }
 		public Waymark Two { get; set; }
+		public Waymark Three { get; set; }
+		public Waymark Four { get; set; }
 
 		/// <summary>
 		/// Property Changed event handler for this model.

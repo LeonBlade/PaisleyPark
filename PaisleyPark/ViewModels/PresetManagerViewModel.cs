@@ -101,6 +101,8 @@ namespace PaisleyPark.ViewModels
 						p.D = GameMemory.D;
 						p.One = GameMemory.One;
 						p.Two = GameMemory.Two;
+						p.Three = GameMemory.Three;
+						p.Four = GameMemory.Four;
 						p.MapID = GameMemory.MapID;
 					}
 
@@ -171,6 +173,8 @@ namespace PaisleyPark.ViewModels
 						SelectedItem.D = GameMemory.D;
 						SelectedItem.One = GameMemory.One;
 						SelectedItem.Two = GameMemory.Two;
+						SelectedItem.Three = GameMemory.Three;
+						SelectedItem.Four = GameMemory.Four;
 						SelectedItem.MapID = GameMemory.MapID;
 					}
 				}

@@ -11,8 +11,8 @@ namespace PaisleyPark.Models
 	/// <summary>
 	/// Settings model used for saving the settings to a file.
 	/// </summary>
-    public class Settings : INotifyPropertyChanged
-    {
+	public class Settings : INotifyPropertyChanged
+	{
 		/// <summary>
 		/// Folder path to where the settings are stored.
 		/// </summary>
@@ -29,14 +29,14 @@ namespace PaisleyPark.Models
 		public string LatestGameVersion { get; set; }
 
 		/// <summary>
-		/// Path to the game to use for various functions.
+		/// Local only waymark placements.
 		/// </summary>
-		// public string GamePath { get; set; }
+		public bool LocalOnly { get; set; } = false;
 
-        /// <summary>
-        /// Port for HTTP server.
-        /// </summary>
-        public int Port { get; set; }
+		/// <summary>
+		/// Port for HTTP server.
+		/// </summary>
+		public int Port { get; set; } = 1337;
 
         /// <summary>
         /// Autostarts the HTTP server on launch.
@@ -88,21 +88,6 @@ namespace PaisleyPark.Models
 			// Get the full path to the settings file.
 			var fullPath = Path.Combine(SETTINGS_FOLDER, SETTINGS_FILE);
 
-			try
-			{
-				// Store three backups 
-				if (File.Exists(fullPath + ".2.bak"))
-					File.Copy(fullPath + ".2.bak", fullPath + ".3.bak", true);
-				if (File.Exists(fullPath + ".1.bak"))
-					File.Copy(fullPath + ".1.bak", fullPath + ".2.bak", true);
-				File.Copy(fullPath, fullPath + ".1.bak", true);
-			}
-			catch (Exception ex)
-			{
-				logger.Error(ex, "Couldn't create backups.");
-				MessageBox.Show("Couldn't create save backups.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Warning);
-			}
-
 			// Create StreamWriter instance to save file contents into full path.
 			using (var text = File.CreateText(fullPath))
 			{
@@ -135,7 +120,7 @@ namespace PaisleyPark.Models
 			{
 				logger.Error("Current settings file is corrupt!");
 				File.Copy(fullPath, fullPath + ".bak");
-				MessageBox.Show("Your settings file is corrupt, a new settings file is being created. You may attempt to restore settings from backups.  Please ask in Discord if you have questions.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Warning);
+				MessageBox.Show("Your settings file is corrupt, a new settings file is being created.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Warning);
 				settings = new Settings();
 			}
 

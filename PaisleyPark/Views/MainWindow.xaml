@@ -77,10 +77,14 @@
 
         </GroupBox>
 
-        <Label HorizontalAlignment="Right">
-            <Hyperlink Command="{Binding DiscordCommand}">Join the Discord</Hyperlink>
-        </Label>
+		<Grid>
+			<CheckBox IsChecked="{Binding UserSettings.LocalOnly}" Content="Local Only" VerticalAlignment="Center" />
+			<Label HorizontalAlignment="Right">
+				<Hyperlink Command="{Binding DiscordCommand}">Join the Discord</Hyperlink>
+			</Label>
+		</Grid>
 
-    </StackPanel>
+
+	</StackPanel>
 
 </Window>

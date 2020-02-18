@@ -53,5 +53,5 @@ namespace PaisleyPark.Models
 	/// <summary>
 	/// Waymark ID is the byte value of the waymark ID in memory.
 	/// </summary>
-	public enum WaymarkID : byte { A = 0, B, C, D, One, Two }
+	public enum WaymarkID : byte { A = 0, B, C, D, One, Two, Three, Four }
 }

@@ -122,6 +122,8 @@ namespace PaisleyPark.ViewModels
 				WriteWaymark(waymarks.D, 3);
 				WriteWaymark(waymarks.One, 4);
 				WriteWaymark(waymarks.Two, 5);
+				WriteWaymark(waymarks.Three, 6);
+				WriteWaymark(waymarks.Four, 7);
 			});
 
 			logger.Debug("Subscribing to Load Preset event.");
@@ -148,6 +150,8 @@ namespace PaisleyPark.ViewModels
 					WriteWaymark(preset.D, 3);
 					WriteWaymark(preset.One, 4);
 					WriteWaymark(preset.Two, 5);
+					WriteWaymark(preset.Three, 6);
+					WriteWaymark(preset.Four, 7);
 				});
 			}
 			catch (Exception ex)
@@ -190,6 +194,8 @@ namespace PaisleyPark.ViewModels
 					preset.D = GameMemory.D;
 					preset.One = GameMemory.One;
 					preset.Two = GameMemory.Two;
+					preset.Three = GameMemory.Three;
+					preset.Four = GameMemory.Four;
 					preset.MapID = GameMemory.MapID;
 
 					Settings.Save(UserSettings);
@@ -609,6 +615,8 @@ namespace PaisleyPark.ViewModels
 			var wayD = (ffxiv + Offsets.Waymarks + 0x60).ToUint64();
 			var wayOne = (ffxiv + Offsets.Waymarks + 0x80).ToUint64();
 			var wayTwo = (ffxiv + Offsets.Waymarks + 0xA0).ToUint64();
+			var wayThree = (ffxiv + Offsets.Waymarks + 0xC0).ToUint64();
+			var wayFour = (ffxiv + Offsets.Waymarks + 0xE0).ToUint64();
 
 			// Worker loop runs indefinitely.
 			while (true)
@@ -640,6 +648,8 @@ namespace PaisleyPark.ViewModels
 					GameMemory.D = ReadWaymark(wayD, WaymarkID.D);
 					GameMemory.One = ReadWaymark(wayOne, WaymarkID.One);
 					GameMemory.Two = ReadWaymark(wayTwo, WaymarkID.Two);
+					GameMemory.Three = ReadWaymark(wayThree, WaymarkID.Three);
+					GameMemory.Four = ReadWaymark(wayFour, WaymarkID.Four);
 
 					// Read the map ID.
 					GameMemory.MapID = GameProcess.ReadUInt32(new Pointer(GameProcess, 0x1AE6A88, 0x5C4));
@@ -671,6 +681,51 @@ namespace PaisleyPark.ViewModels
 			// Ensure the waymark isn't null.
 			if (waymark == null)
 				return;
+
+			// Initialize pointers and addresses to the memory we're going to read.
+			var ffxiv = GameProcess.BaseProcess.MainModule.BaseAddress;
+
+			// pointers for waymark positions
+			var wayA = (ffxiv + Offsets.Waymarks + 0x00).ToUint64();
+			var wayB = (ffxiv + Offsets.Waymarks + 0x20).ToUint64();
+			var wayC = (ffxiv + Offsets.Waymarks + 0x40).ToUint64();
+			var wayD = (ffxiv + Offsets.Waymarks + 0x60).ToUint64();
+			var wayOne = (ffxiv + Offsets.Waymarks + 0x80).ToUint64();
+			var wayTwo = (ffxiv + Offsets.Waymarks + 0xA0).ToUint64();
+			var wayThree = (ffxiv + Offsets.Waymarks + 0xC0).ToUint64();
+			var wayFour = (ffxiv + Offsets.Waymarks + 0xE0).ToUint64();
+
+			if (UserSettings.LocalOnly)
+			{
+				ulong markAddr = 0;
+				if (waymark.ID == WaymarkID.A)
+					markAddr = wayA;
+				else if (waymark.ID == WaymarkID.B)
+					markAddr = wayB;
+				else if (waymark.ID == WaymarkID.C)
+					markAddr = wayC;
+				else if (waymark.ID == WaymarkID.D)
+					markAddr = wayD;
+				else if (waymark.ID == WaymarkID.One)
+					markAddr = wayOne;
+				else if (waymark.ID == WaymarkID.Two)
+					markAddr = wayTwo;
+				else if (waymark.ID == WaymarkID.Three)
+					markAddr = wayThree;
+				else if (waymark.ID == WaymarkID.Four)
+					markAddr = wayFour;
+
+				// Write the X, Y and Z coordinates
+				GameProcess.Write(markAddr, waymark.X);
+				GameProcess.Write(markAddr + 0x4, waymark.Y);
+				GameProcess.Write(markAddr + 0x8, waymark.Z);
+
+				// Write the active state
+				GameProcess.Write(markAddr + 0x10, (byte)(waymark.Active ? 1 : 0));
+
+				// Return out of this function
+				return;
+			}
 
 			// Write the X, Y and Z coordinates.
 			GameProcess.Write(_newmem, waymark.X);
@@ -755,6 +810,8 @@ namespace PaisleyPark.ViewModels
 					WriteWaymark(CurrentPreset.D, 3);
 					WriteWaymark(CurrentPreset.One, 4);
 					WriteWaymark(CurrentPreset.Two, 5);
+					WriteWaymark(CurrentPreset.Three, 6);
+					WriteWaymark(CurrentPreset.Four, 7);
 				});
 
 				WaymarkThread.Start();

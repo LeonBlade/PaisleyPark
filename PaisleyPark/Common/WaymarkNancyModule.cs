@@ -14,7 +14,9 @@ namespace PaisleyPark.Common
         public Waymark D { get; set; }
         public Waymark One { get; set; }
         public Waymark Two { get; set; }
-    }
+		public Waymark Three { get; set; }
+		public Waymark Four { get; set; }
+	}
 
     public class WaymarkNancyModule : NancyModule
     {
@@ -37,8 +39,10 @@ namespace PaisleyPark.Common
                     C = MainWindowViewModel.GameMemory.C,
                     D = MainWindowViewModel.GameMemory.D,
                     One = MainWindowViewModel.GameMemory.One,
-                    Two = MainWindowViewModel.GameMemory.Two
-                };
+                    Two = MainWindowViewModel.GameMemory.Two,
+					Three = MainWindowViewModel.GameMemory.Three,
+					Four = MainWindowViewModel.GameMemory.Four
+				};
 
                 // Serialize and return the response.
                 return JsonConvert.SerializeObject(response);
