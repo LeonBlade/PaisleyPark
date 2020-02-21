@@ -250,7 +250,7 @@ namespace PaisleyPark.ViewModels
 
 			logger.Info("Injecting code...");
 			// Inject our code.
-			InjectCode();
+			// InjectCode();
 
 			logger.Info("Starting server...");
 			// Check autostart and start the HTTP server if it's true.
@@ -532,7 +532,7 @@ namespace PaisleyPark.ViewModels
 				var ffxiv_dx11 = GameProcess.BaseProcess.MainModule.BaseAddress;
 				// Waymark function address.
 				// TODO: AoB!
-				// 48 89 6C 24 10 48 89 74 24 18 57 48 83 EC 30 8B EA 49 8B F0 48 8B F9 83 FA 06
+				// 48 89 74 24 20 57 48 83 EC 30 8B F2 48 8B F9 83 FA 08
 				var waymarkFunc = (ffxiv_dx11 + Offsets.WaymarkFunc).ToUint64();
 				// Waymark class instance. (?)
 				// 45 33 c0 8d 57 ff 48 8d 0d (lea rcx offset before call to function) 
@@ -635,7 +635,7 @@ namespace PaisleyPark.ViewModels
 					X = GameProcess.ReadFloat(addr),
 					Y = GameProcess.ReadFloat(addr + 0x4),
 					Z = GameProcess.ReadFloat(addr + 0x8),
-					Active = GameProcess.ReadByte(addr + 0x10) == 1,
+					Active = GameProcess.ReadByte(addr + 0x1C) == 1,
 					ID = id
 				};
 
@@ -682,6 +682,8 @@ namespace PaisleyPark.ViewModels
 			if (waymark == null)
 				return;
 
+			var wID = (id == -1 ? (byte)waymark.ID : id);
+
 			// Initialize pointers and addresses to the memory we're going to read.
 			var ffxiv = GameProcess.BaseProcess.MainModule.BaseAddress;
 
@@ -698,21 +700,21 @@ namespace PaisleyPark.ViewModels
 			if (UserSettings.LocalOnly)
 			{
 				ulong markAddr = 0;
-				if (waymark.ID == WaymarkID.A)
+				if (wID == (int)WaymarkID.A)
 					markAddr = wayA;
-				else if (waymark.ID == WaymarkID.B)
+				else if (wID == (int)WaymarkID.B)
 					markAddr = wayB;
-				else if (waymark.ID == WaymarkID.C)
+				else if (wID == (int)WaymarkID.C)
 					markAddr = wayC;
-				else if (waymark.ID == WaymarkID.D)
+				else if (wID == (int)WaymarkID.D)
 					markAddr = wayD;
-				else if (waymark.ID == WaymarkID.One)
+				else if (wID == (int)WaymarkID.One)
 					markAddr = wayOne;
-				else if (waymark.ID == WaymarkID.Two)
+				else if (wID == (int)WaymarkID.Two)
 					markAddr = wayTwo;
-				else if (waymark.ID == WaymarkID.Three)
+				else if (wID == (int)WaymarkID.Three)
 					markAddr = wayThree;
-				else if (waymark.ID == WaymarkID.Four)
+				else if (wID == (int)WaymarkID.Four)
 					markAddr = wayFour;
 
 				// Write the X, Y and Z coordinates
@@ -720,13 +722,18 @@ namespace PaisleyPark.ViewModels
 				GameProcess.Write(markAddr + 0x4, waymark.Y);
 				GameProcess.Write(markAddr + 0x8, waymark.Z);
 
+				GameProcess.Write(markAddr + 0x10, (int)(waymark.X * 1000));
+				GameProcess.Write(markAddr + 0x14, (int)(waymark.Y * 1000));
+				GameProcess.Write(markAddr + 0x18, (int)(waymark.Z * 1000));
+
 				// Write the active state
-				GameProcess.Write(markAddr + 0x10, (byte)(waymark.Active ? 1 : 0));
+				GameProcess.Write(markAddr + 0x1C, (byte)(waymark.Active ? 1 : 0));
 
 				// Return out of this function
 				return;
 			}
 
+			/*
 			// Write the X, Y and Z coordinates.
 			GameProcess.Write(_newmem, waymark.X);
 			GameProcess.Write(_newmem + 0x4, waymark.Y);
@@ -751,7 +758,7 @@ namespace PaisleyPark.ViewModels
 			Kernel32.WaitForSingleObject(threadHandle, unchecked((uint)-1));
 
 			// Close the thread handle.
-			Kernel32.CloseHandle(threadHandle);
+			Kernel32.CloseHandle(threadHandle);*/
 		}
 
 		/// <summary>
@@ -760,7 +767,7 @@ namespace PaisleyPark.ViewModels
 		private void LoadPreset()
 		{
 			// Ensure that our injection and newmem addresses are set.
-			if (_inject == 0 || _newmem == 0)
+			/*if (_inject == 0 || _newmem == 0)
 			{
 				MessageBox.Show(
 					"Code is not injected for placing waymarks!",
@@ -771,6 +778,12 @@ namespace PaisleyPark.ViewModels
 				logger.Error("Injection somehow failed yet wasn't caught by an earlier error. You should not see this!");
 				OnClose();
 				Application.Current.Shutdown();
+			}*/
+
+			if (!UserSettings.LocalOnly)
+			{
+				MessageBox.Show("This version of Paisley Park only supports Local Only mode.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+				return;
 			}
 
 			// Ensure we have a preset selected.
