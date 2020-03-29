@@ -196,7 +196,6 @@ namespace PaisleyPark.ViewModels
 					preset.Two = GameMemory.Two;
 					preset.Three = GameMemory.Three;
 					preset.Four = GameMemory.Four;
-					preset.MapID = GameMemory.MapID;
 
 					Settings.Save(UserSettings);
 				});
@@ -274,32 +273,26 @@ namespace PaisleyPark.ViewModels
 			// Check the game version against what we have saved in settings.
 			if (UserSettings.LatestGameVersion != GameVersion)
 			{
-				logger.Info($"Latest version {GameVersion} does not match the latest game version in settings {UserSettings.LatestGameVersion}");
-
-				var result = MessageBox.Show("There are new offsets available from the web. Would you like to use these offsets?", "Paisley Park", MessageBoxButton.YesNo, MessageBoxImage.Question);
-				if (result == MessageBoxResult.Yes)
+				logger.Info($"Latest version {GameVersion} does not match the latest game version in settings {UserSettings.LatestGameVersion}. Downloading new ones.");
+				// Create client to fetch latest version of offsets.
+				try
 				{
-					logger.Info("User is downloading latest offsets.");
-					// Create client to fetch latest version of offsets.
-					try
+					using (var client = new WebClient())
 					{
-						using (var client = new WebClient())
-						{
-							// Form the URI for the game version's offsets file.
-							var uri = new Uri(OffsetUrl, $"{GameVersion}.json");
-							// Write the JSON to the disk overwriting the Offsets.json file used locally.
-							File.WriteAllText(Path.Combine(Environment.CurrentDirectory, "Offsets.json"), client.DownloadString(uri));
-							// Set the lateste version to the version downloaded.
-							UserSettings.LatestGameVersion = GameVersion;
-							// Save the settings.
-							Settings.Save(UserSettings);
-						}
+						// Form the URI for the game version's offsets file.
+						var uri = new Uri(OffsetUrl, $"{GameVersion}.json");
+						// Write the JSON to the disk overwriting the Offsets.json file used locally.
+						File.WriteAllText(Path.Combine(Environment.CurrentDirectory, "Offsets.json"), client.DownloadString(uri));
+						// Set the lateste version to the version downloaded.
+						UserSettings.LatestGameVersion = GameVersion;
+						// Save the settings.
+						Settings.Save(UserSettings);
 					}
-					catch (Exception ex)
-					{
-						MessageBox.Show("Couldn't fetch or save offsets from the server. Your offsets could be out of date, and if so, may cause the game to crash.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
-						logger.Error(ex, "Couldn't fetch or save offsets from the server!");
-					}
+				}
+				catch (WebException ex)
+				{
+					MessageBox.Show("Offsets were not found for your current version of the game.  This may cause unexpected problems and placing waymarks may not work.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
+					logger.Error(ex, "Couldn't fetch or save offsets from the server!");
 				}
 			}
 
@@ -511,6 +504,7 @@ namespace PaisleyPark.ViewModels
 		/// <summary>
 		/// Injects code into the game.
 		/// </summary>
+		/*
 		private void InjectCode()
 		{
 			// Ensure process is valid.
@@ -594,7 +588,7 @@ namespace PaisleyPark.ViewModels
 				OnClose();
 				Application.Current.Shutdown();
 			}
-		}
+		}*/
 
 		/// <summary>
 		/// Worker loop for reading memory.
@@ -621,10 +615,6 @@ namespace PaisleyPark.ViewModels
 			// Worker loop runs indefinitely.
 			while (true)
 			{
-				// Pointers for player position, start of the actor table (first actor in the table is you)
-				// NOTE: needs to be addressed in the loop because it changes dynamically.
-				var playerPosition = new Pointer(GameProcess, (ulong)Offsets.ActorTable + 0x8, 0xF0, 0x50);
-
 				// Supporting cancellation.
 				if (Worker.CancellationPending)
 					e.Cancel = true;
@@ -650,14 +640,6 @@ namespace PaisleyPark.ViewModels
 					GameMemory.Two = ReadWaymark(wayTwo, WaymarkID.Two);
 					GameMemory.Three = ReadWaymark(wayThree, WaymarkID.Three);
 					GameMemory.Four = ReadWaymark(wayFour, WaymarkID.Four);
-
-					// Read the map ID.
-					GameMemory.MapID = GameProcess.ReadUInt32(new Pointer(GameProcess, 0x1AE6A88, 0x5C4));
-
-					// Read in player position.
-					GameMemory.PlayerX = GameProcess.ReadFloat(playerPosition);
-					GameMemory.PlayerY = GameProcess.ReadFloat(playerPosition + 0x4);
-					GameMemory.PlayerZ = GameProcess.ReadFloat(playerPosition + 0x8);
 
 					// Publish our event on the EventAggregator.
 					EventAggregator.GetEvent<GameMemoryUpdateEvent>().Publish(GameMemory);
@@ -789,22 +771,6 @@ namespace PaisleyPark.ViewModels
 			// Ensure we have a preset selected.
 			if (CurrentPreset == null)
 				return;
-
-			// Check if user coordinates are all 0.  This likely means that we're still loading into the zone.
-			if (GameMemory.PlayerX == 0 && GameMemory.PlayerY == 0 && GameMemory.PlayerZ == 0)
-			{
-				// Ask the user if they want to still place based on the XYZ being all 0.
-				var result = MessageBox.Show(
-					"There is a problem loading your current position, this may cause crashing. Are you sure you want to do this?",
-					"Paisley Park",
-					MessageBoxButton.YesNo,
-					MessageBoxImage.Warning
-				);
-
-				// If we didn't say yes then return.
-				if (result != MessageBoxResult.Yes)
-					return;
-			}
 
 			// Calls the waymark function for all our waymarks.
 			try

@@ -103,7 +103,6 @@ namespace PaisleyPark.ViewModels
 						p.Two = GameMemory.Two;
 						p.Three = GameMemory.Three;
 						p.Four = GameMemory.Four;
-						p.MapID = GameMemory.MapID;
 					}
 
 					// Add the preset.
@@ -175,7 +174,6 @@ namespace PaisleyPark.ViewModels
 						SelectedItem.Two = GameMemory.Two;
 						SelectedItem.Three = GameMemory.Three;
 						SelectedItem.Four = GameMemory.Four;
-						SelectedItem.MapID = GameMemory.MapID;
 					}
 				}
 			}

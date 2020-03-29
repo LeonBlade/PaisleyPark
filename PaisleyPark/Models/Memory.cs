@@ -8,18 +8,6 @@ namespace PaisleyPark.Models
 	public class Memory : INotifyPropertyChanged
 	{
 		/// <summary>
-		/// Current Map ID.
-		/// </summary>
-		public uint MapID { get; set; }
-
-		/// <summary>
-		/// Player coordinates in game.
-		/// </summary>
-		public float PlayerX { get; set; }
-		public float PlayerY { get; set; }
-		public float PlayerZ { get; set; }
-
-		/// <summary>
 		/// Waymark coordinates in game.
 		/// </summary>
 		public Waymark A { get; set; }
