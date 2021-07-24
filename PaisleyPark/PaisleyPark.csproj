@@ -95,7 +95,6 @@
     <Compile Include="Common\WaymarkEvent.cs" />
     <Compile Include="Common\WaymarkNancyModule.cs" />
     <Compile Include="Models\Memory.cs" />
-    <Compile Include="Models\Offsets.cs" />
     <Compile Include="Models\Preset.cs" />
     <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\Waymark.cs" />
@@ -201,6 +200,9 @@
     <PackageReference Include="Markdig">
       <Version>0.17.1</Version>
     </PackageReference>
+    <PackageReference Include="Memory.dll.x64">
+      <Version>1.2.21</Version>
+    </PackageReference>
     <PackageReference Include="MSBuildTasks">
       <Version>1.5.0.235</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -245,16 +247,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="FodyWeavers.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\lib\Nhaama.FFXIV\Nhaama.FFXIV.csproj">
-      <Project>{af6e37bd-4598-4194-945b-c8f6ee9309fe}</Project>
-      <Name>Nhaama.FFXIV</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\lib\Nhaama.Memory\Nhaama.Memory.csproj">
-      <Project>{933935a7-8d04-42e8-aee5-122b3aeed820}</Project>
-      <Name>Nhaama.Memory</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)Bundle.targets" />

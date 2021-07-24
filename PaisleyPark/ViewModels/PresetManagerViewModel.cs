@@ -24,7 +24,7 @@ namespace PaisleyPark.ViewModels
 		public ICommand ExportCommand { get; private set; }
 
 		public bool DialogResult { get; private set; }
-		private Memory GameMemory;
+		private Models.Memory GameMemory;
 		private readonly static NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
 		public PresetManagerViewModel(IEventAggregator ea)
@@ -47,7 +47,7 @@ namespace PaisleyPark.ViewModels
 		private void OnGameMemoryUpdate(object gameMemory)
 		{
 			// Assign the GameMemory to the memory from the update method.
-			GameMemory = gameMemory as Memory;
+			GameMemory = gameMemory as Models.Memory;
 		}
 
 		/// <summary>

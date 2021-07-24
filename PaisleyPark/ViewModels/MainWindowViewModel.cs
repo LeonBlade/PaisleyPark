@@ -1,8 +1,4 @@
 using Nancy.Hosting.Self;
-using Newtonsoft.Json;
-using Nhaama.FFXIV;
-using Nhaama.Memory;
-using Nhaama.Memory.Native;
 using PaisleyPark.Common;
 using PaisleyPark.Models;
 using PaisleyPark.Views;
@@ -16,7 +12,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace PaisleyPark.ViewModels
@@ -24,9 +19,9 @@ namespace PaisleyPark.ViewModels
 	public class MainWindowViewModel : BindableBase
 	{
 		public static IEventAggregator EventAggregator { get; private set; }
-		private NhaamaProcess GameProcess { get; set; }
+		private Memory.Mem mem { get; set; } = new Memory.Mem();
 		private BackgroundWorker Worker;
-		public static Memory GameMemory { get; set; } = new Memory();
+		public static Models.Memory GameMemory { get; set; } = new Models.Memory();
 		public Settings UserSettings { get; set; }
 		public Preset CurrentPreset { get; set; }
 		public string WindowTitle { get; set; } = "Paisley Park";
@@ -35,21 +30,10 @@ namespace PaisleyPark.ViewModels
 		private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 		private NancyHost Host;
 		private Thread WaymarkThread;
-		private Offsets Offsets;
 		private readonly Version CurrentVersion;
-		private string GameVersion;
+		private long WaymarkAddr;
 		public string DiscordUri { get; private set; } = "https://discord.gg/hq3DnBa";
-		private static readonly Uri OffsetUrl = new Uri("https://raw.githubusercontent.com/LeonBlade/PaisleyPark/master/Offsets/");
 
-#pragma warning disable IDE1006 // Naming Styles
-
-		// Memory addresses for our injection.
-		public ulong _newmem { get; private set; }
-		public ulong _inject { get; private set; }
-
-#pragma warning restore IDE1006 // Naming Styles
-
-		public DelegateCommand ManagePreset { get; private set; }
 		public DelegateCommand LoadPresetCommand { get; private set; }
 		public DelegateCommand ManagePresetsCommand { get; private set; }
 		public DelegateCommand ClosingCommand { get; private set; }
@@ -242,14 +226,9 @@ namespace PaisleyPark.ViewModels
 		/// <returns>Successful initialization.</returns>
 		private bool Initialize()
 		{
-			logger.Info("Initializing Nhaama...");
+			logger.Info("Initializing Memory.dll...");
 			// Initialize Nhaama.
-			if (!InitializeNhaama())
-				return false;
-
-			logger.Info("Injecting code...");
-			// Inject our code.
-			// InjectCode();
+			InitializeMemory();
 
 			logger.Info("Starting server...");
 			// Check autostart and start the HTTP server if it's true.
@@ -257,82 +236,6 @@ namespace PaisleyPark.ViewModels
 				OnStartServer();
 
 			return true;
-		}
-
-		/// <summary>
-		/// Gets the offsets for the program, also checks for a new version for this game version.
-		/// </summary>
-		private void GetOffsets()
-		{
-			// Get the current version of FFXIV.
-			var gameDirectory = new DirectoryInfo(GameProcess.BaseProcess.MainModule.FileName);
-			GameVersion = File.ReadAllText(Path.Combine(gameDirectory.Parent.FullName, "ffxivgame.ver"));
-
-			logger.Debug($"Game version is {GameVersion}");
-
-			// Check the game version against what we have saved in settings.
-			if (UserSettings.LatestGameVersion != GameVersion)
-			{
-				logger.Info($"Latest version {GameVersion} does not match the latest game version in settings {UserSettings.LatestGameVersion}. Downloading new ones.");
-				// Create client to fetch latest version of offsets.
-				try
-				{
-					using (var client = new WebClient())
-					{
-						// Form the URI for the game version's offsets file.
-						var uri = new Uri(OffsetUrl, $"{GameVersion}.json");
-						// Write the JSON to the disk overwriting the Offsets.json file used locally.
-						File.WriteAllText(Path.Combine(Environment.CurrentDirectory, "Offsets.json"), client.DownloadString(uri));
-						// Set the lateste version to the version downloaded.
-						UserSettings.LatestGameVersion = GameVersion;
-						// Save the settings.
-						Settings.Save(UserSettings);
-					}
-				}
-				catch (WebException ex)
-				{
-					MessageBox.Show("Offsets were not found for your current version of the game.  This may cause unexpected problems and placing waymarks may not work.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
-					logger.Error(ex, "Couldn't fetch or save offsets from the server!");
-				}
-			}
-
-			// Read the offsets.json file.
-			try
-			{
-				using (var r = new StreamReader(Path.Combine(Environment.CurrentDirectory, "Offsets.json")))
-				{
-					Offsets = JsonConvert.DeserializeObject<Offsets>(r.ReadToEnd());
-				}
-			}
-			catch (Exception)
-			{
-				MessageBox.Show("Couldn't load the offsets file!  Please select the offsets file manually.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-				var dlg = new Microsoft.Win32.OpenFileDialog
-				{
-					InitialDirectory = Environment.CurrentDirectory,
-					DefaultExt = ".json",
-					Filter = "JSON Files (*.json)|*.json|All files (*.*)|*.*"
-				};
-
-				// Show dialog.
-				var result = dlg.ShowDialog();
-
-				if (result == true)
-				{
-					try
-					{
-						using (var r = new StreamReader(dlg.FileName))
-						{
-							Offsets = JsonConvert.DeserializeObject<Offsets>(r.ReadToEnd());
-						}
-					}
-					catch (Exception)
-					{
-						MessageBox.Show("Could not open this offset file. Shutting down.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
-						Application.Current.Shutdown();
-					}
-				}
-			}
 		}
 
 		/// <summary>
@@ -395,7 +298,7 @@ namespace PaisleyPark.ViewModels
 		/// <summary>
 		/// Initialize Nhaama for use in the application.
 		/// </summary>
-		private bool InitializeNhaama()
+		private async void InitializeMemory()
 		{
 			// Get the processes of XIV.
 			var procs = Process.GetProcessesByName("ffxiv_dx11");
@@ -405,24 +308,24 @@ namespace PaisleyPark.ViewModels
 			{
 				// Show the process selector window.
 				if (!ShowProcessSelector(procs))
-					return false;
+					return;
 			}
 			else
 				// Get the Nhaama process from the first process that matches for XIV.
-				GameProcess = procs[0].GetNhaamaProcess();
+				mem.OpenProcess(procs[0].Id);
 
-			if (GameProcess == null)
+			if (mem.theProc == null)
 			{
 				logger.Error("Couldn't get Nhaama process");
 				MessageBox.Show("Coult not get the Nhaama Process for FFXIV.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
-				return false;
+				return;
 			}
 
 			// Enable raising events.
-			GameProcess.BaseProcess.EnableRaisingEvents = true;
+			mem.theProc.EnableRaisingEvents = true;
 
 			// Listen to some stuff.
-			GameProcess.BaseProcess.Exited += (_, e) =>
+			mem.theProc.Exited += (_, e) =>
 			{
 				MessageBox.Show(
 					"Looks like FINAL FANTASY XIV crashed or shut down.",
@@ -436,26 +339,17 @@ namespace PaisleyPark.ViewModels
 				Application.Current.Dispatcher.Invoke(() => Initialize());
 			};
 
-			// Initialize as an empty string.
-			string gameVersion = "";
-			string ffxiv_folder = "";
+			// Console.WriteLine($"{mem.theProc.MainModule.BaseAddress:X} {(mem.theProc.MainModule.BaseAddress + mem.theProc.MainModule.ModuleMemorySize):X}");
+			var start = mem.theProc.MainModule.BaseAddress.ToInt64();
+			var stop = (start + mem.theProc.MainModule.ModuleMemorySize);
 
-			try
-			{
-				// Get FFXIV game folder.
-				ffxiv_folder = Path.GetDirectoryName(GameProcess.BaseProcess.MainModule.FileName);
-				// Read the version file.
-				gameVersion = File.ReadAllLines(Path.Combine(ffxiv_folder, "ffxivgame.ver"))[0];
-			}
-			catch (Exception ex)
-			{
-				logger.Error(ex, $"There is an error getting your FFXIV game version. {ffxiv_folder}");
-				MessageBox.Show("There was a problem getting your game version, cannot start!", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
-				Application.Current.Shutdown();
-			}
+			var asmAddr = (await mem.AoBScan(start, stop, "48 8d 0d ?? ?? ?? ?? e8 ?? ?? ?? ?? 48 3b c3 75 ?? ff c7 3b fe")).FirstOrDefault();
+			if (asmAddr == 0)
+				throw new Exception("Couldn't find waymark address");
 
-			// Get offsets.
-			GetOffsets();
+			var read = mem.ReadBytes((asmAddr + 3).ToString("X"), 8);
+			var offset = BitConverter.ToInt32(read, 0);
+			WaymarkAddr = asmAddr + offset + 4 + 3 + 0x1B0;
 
 			// Create new worker.
 			Worker = new BackgroundWorker();
@@ -465,9 +359,6 @@ namespace PaisleyPark.ViewModels
 			Worker.WorkerSupportsCancellation = true;
 			// Begin the loop.
 			Worker.RunWorkerAsync();
-
-			// Success!
-			return true;
 		}
 
 		/// <summary>
@@ -495,100 +386,11 @@ namespace PaisleyPark.ViewModels
 			}
 
 			// Set the selected process.
-			GameProcess = vm.SelectedProcess.GetNhaamaProcess();
+			mem.theProc = vm.SelectedProcess;
 
 			// We did it.
 			return true;
 		}
-
-		/// <summary>
-		/// Injects code into the game.
-		/// </summary>
-		/*
-		private void InjectCode()
-		{
-			// Ensure process is valid.
-			if (GameProcess == null)
-			{
-				MessageBox.Show(
-					"FINAL FANTASY XIV is not running or something bad happened!",
-					"Paisley Park",
-					MessageBoxButton.OK,
-					MessageBoxImage.Error
-				);
-				logger.Error("FFXIV is not running during injection. This should never be seen!");
-				Application.Current.Shutdown();
-			}
-
-			try
-			{
-				// Get xiv's base address.
-				var ffxiv_dx11 = GameProcess.BaseProcess.MainModule.BaseAddress;
-				// Waymark function address.
-				// TODO: AoB!
-				// 48 89 74 24 20 57 48 83 EC 30 8B F2 48 8B F9 83 FA 08
-				var waymarkFunc = (ffxiv_dx11 + Offsets.WaymarkFunc).ToUint64();
-				// Waymark class instance. (?)
-				// 45 33 c0 8d 57 ff 48 8d 0d (lea rcx offset before call to function) 
-				var waymarkClassPointer = (ffxiv_dx11 + Offsets.WaymarkClassPtr).ToUint64();
-
-				logger.Debug("FFXIV Base Address: {0}", ffxiv_dx11.ToUint64().AsHex());
-				logger.Debug("Waymark Function: {0}", waymarkFunc.AsHex());
-				logger.Debug("Waymark Pointer: {0}", waymarkClassPointer.AsHex());
-
-				// Allocate new memory for our function's data.
-				_newmem = GameProcess.Alloc(14, ffxiv_dx11.ToUint64());
-
-				logger.Info("_newmem: {0}", _newmem.AsHex());
-
-				// Assembly instructions.
-				string asm = string.Format(string.Join("\n", new string[]
-				{
-					"sub rsp, 40",          // give room in stack
-                    "xor rdx, rdx",			// zero out rdx and r8
-                    "xor r8, r8",
-					"mov rax, {0}",			// memory allocated
-                    "mov rbx, [rax+0xD]",	// active state
-                    "mov dl, [rax+0xC]",	// waypoint ID
-                    "test rbx, rbx",
-					"jz skip",
-					"lea r8, [rax]",		// waypoint x,y,z coordinates
-                    "skip:",
-					"mov rax, {1}",			// waymark class pointer
-                    "lea rcx, [rax]",
-					"mov rax, {2}",			// waymark function
-                    "call rax",
-					"add rsp, 40",          // move stack pointer back
-                    "ret"
-				}), _newmem.AsHex(), waymarkClassPointer.AsHex(), waymarkFunc.AsHex());
-
-				// Get bytes from AsmjitCSharp.
-				var bytes = AsmjitCSharp.Assemble(asm);
-
-				// log bytes as hex
-				logger.Debug("Bytes: {0}", BitConverter.ToString(bytes).Replace("-", " "));
-
-				// Allocate bytes for our code injection near waymark function.
-				_inject = GameProcess.Alloc((uint)bytes.LongLength, waymarkFunc);
-
-				logger.Info("_inject: {0}", _inject.AsHex());
-
-				// Write our injection bytes into the process.
-				GameProcess.WriteBytes(_inject, bytes);
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show("Something happened while injecting into FINAL FANTASY XIV!", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Error);
-				logger.Error(
-					ex,
-					"Injection Failed! newmem: {0}, inject: {1}",
-					_newmem.AsHex(),
-					_inject.AsHex()
-				);
-				OnClose();
-				Application.Current.Shutdown();
-			}
-		}*/
 
 		/// <summary>
 		/// Worker loop for reading memory.
@@ -597,20 +399,15 @@ namespace PaisleyPark.ViewModels
 		/// <param name="e"></param>
 		private void OnWork(object sender, DoWorkEventArgs e)
 		{
-			// Initialize pointers and addresses to the memory we're going to read.
-			var ffxiv = GameProcess.BaseProcess.MainModule.BaseAddress;
-
-			var WaymarkAddr = new IntPtr();
-
 			// pointers for waymark positions
-			var wayA = (ffxiv + Offsets.Waymarks + 0x00).ToUint64();
-			var wayB = (ffxiv + Offsets.Waymarks + 0x20).ToUint64();
-			var wayC = (ffxiv + Offsets.Waymarks + 0x40).ToUint64();
-			var wayD = (ffxiv + Offsets.Waymarks + 0x60).ToUint64();
-			var wayOne = (ffxiv + Offsets.Waymarks + 0x80).ToUint64();
-			var wayTwo = (ffxiv + Offsets.Waymarks + 0xA0).ToUint64();
-			var wayThree = (ffxiv + Offsets.Waymarks + 0xC0).ToUint64();
-			var wayFour = (ffxiv + Offsets.Waymarks + 0xE0).ToUint64();
+			var wayA = WaymarkAddr + 0x00;
+			var wayB = WaymarkAddr + 0x20;
+			var wayC = WaymarkAddr + 0x40;
+			var wayD = WaymarkAddr + 0x60;
+			var wayOne = WaymarkAddr + 0x80;
+			var wayTwo = WaymarkAddr + 0xA0;
+			var wayThree = WaymarkAddr + 0xC0;
+			var wayFour = WaymarkAddr + 0xE0;
 
 			// Worker loop runs indefinitely.
 			while (true)
@@ -620,12 +417,12 @@ namespace PaisleyPark.ViewModels
 					e.Cancel = true;
 
 				// ReadWaymark local function to read multiple waymarks with.
-				Waymark ReadWaymark(ulong addr, WaymarkID id) => new Waymark
+				Waymark ReadWaymark(long addr, WaymarkID id) => new Waymark
 				{
-					X = GameProcess.ReadFloat(addr),
-					Y = GameProcess.ReadFloat(addr + 0x4),
-					Z = GameProcess.ReadFloat(addr + 0x8),
-					Active = GameProcess.ReadByte(addr + 0x1C) == 1,
+					X = mem.ReadFloat(addr.ToString("X")),
+					Y = mem.ReadFloat((addr + 0x4).ToString("X")),
+					Z = mem.ReadFloat((addr + 0x8).ToString("X")),
+					Active = mem.ReadByte((addr + 0x1C).ToString("X")) == 1,
 					ID = id
 				};
 
@@ -646,7 +443,7 @@ namespace PaisleyPark.ViewModels
 				}
 				catch (Exception ex)
 				{
-					logger.Error(ex, "Exception while reading game memory. Waymark Address: {0}", WaymarkAddr.ToString("X4"));
+					logger.Error(ex, "Exception while reading game memory.");
 				}
 
 				// Sleep before next loop.
@@ -664,24 +461,21 @@ namespace PaisleyPark.ViewModels
 			if (waymark == null)
 				return;
 
-			var wID = (id == -1 ? (byte)waymark.ID : id);
-
-			// Initialize pointers and addresses to the memory we're going to read.
-			var ffxiv = GameProcess.BaseProcess.MainModule.BaseAddress;
+			var wID = id == -1 ? (byte)waymark.ID : id;
 
 			// pointers for waymark positions
-			var wayA = (ffxiv + Offsets.Waymarks + 0x00).ToUint64();
-			var wayB = (ffxiv + Offsets.Waymarks + 0x20).ToUint64();
-			var wayC = (ffxiv + Offsets.Waymarks + 0x40).ToUint64();
-			var wayD = (ffxiv + Offsets.Waymarks + 0x60).ToUint64();
-			var wayOne = (ffxiv + Offsets.Waymarks + 0x80).ToUint64();
-			var wayTwo = (ffxiv + Offsets.Waymarks + 0xA0).ToUint64();
-			var wayThree = (ffxiv + Offsets.Waymarks + 0xC0).ToUint64();
-			var wayFour = (ffxiv + Offsets.Waymarks + 0xE0).ToUint64();
+			var wayA = WaymarkAddr + 0x00;
+			var wayB = WaymarkAddr + 0x20;
+			var wayC = WaymarkAddr + 0x40;
+			var wayD = WaymarkAddr + 0x60;
+			var wayOne = WaymarkAddr + 0x80;
+			var wayTwo = WaymarkAddr + 0xA0;
+			var wayThree = WaymarkAddr + 0xC0;
+			var wayFour = WaymarkAddr + 0xE0;
 
 			if (UserSettings.LocalOnly)
 			{
-				ulong markAddr = 0;
+				long markAddr = 0;
 				if (wID == (int)WaymarkID.A)
 					markAddr = wayA;
 				else if (wID == (int)WaymarkID.B)
@@ -700,47 +494,20 @@ namespace PaisleyPark.ViewModels
 					markAddr = wayFour;
 
 				// Write the X, Y and Z coordinates
-				GameProcess.Write(markAddr, waymark.X);
-				GameProcess.Write(markAddr + 0x4, waymark.Y);
-				GameProcess.Write(markAddr + 0x8, waymark.Z);
+				mem.WriteBytes((UIntPtr)markAddr, BitConverter.GetBytes(waymark.X));
+				mem.WriteBytes((UIntPtr)markAddr + 0x4, BitConverter.GetBytes(waymark.Y));
+				mem.WriteBytes((UIntPtr)markAddr + 0x8, BitConverter.GetBytes(waymark.Z));
 
-				GameProcess.Write(markAddr + 0x10, (int)(waymark.X * 1000));
-				GameProcess.Write(markAddr + 0x14, (int)(waymark.Y * 1000));
-				GameProcess.Write(markAddr + 0x18, (int)(waymark.Z * 1000));
+				mem.WriteBytes((UIntPtr)markAddr + 0x10, BitConverter.GetBytes((int)(waymark.X * 1000)));
+				mem.WriteBytes((UIntPtr)markAddr + 0x14, BitConverter.GetBytes((int)(waymark.Y * 1000)));
+				mem.WriteBytes((UIntPtr)markAddr + 0x18, BitConverter.GetBytes((int)(waymark.Z * 1000)));
 
 				// Write the active state
-				GameProcess.Write(markAddr + 0x1C, (byte)(waymark.Active ? 1 : 0));
+				mem.WriteBytes((UIntPtr)markAddr + 0x1C, new byte[] { (byte)(waymark.Active ? 1 : 0) });
 
 				// Return out of this function
 				return;
 			}
-
-			/*
-			// Write the X, Y and Z coordinates.
-			GameProcess.Write(_newmem, waymark.X);
-			GameProcess.Write(_newmem + 0x4, waymark.Y);
-			GameProcess.Write(_newmem + 0x8, waymark.Z);
-
-			// Write the waymark ID.
-			GameProcess.Write(_newmem + 0xC, (byte)(id == -1 ? (byte)waymark.ID : id));
-
-			// Write the enable state
-			GameProcess.Write(_newmem + 0xD, (byte)(waymark.Active ? 1 : 0));
-
-			// Create a thread to call our injected function.
-			var threadHandle = GameProcess.CreateRemoteThread(new IntPtr((long)_inject), out _);
-
-			// Ensure the delay is at least 10 ms.
-			var delay = Math.Max(UserSettings.PlacementDelay, 10);
-
-			// Wait a selected number of ms
-			Task.Delay(delay).Wait();
-
-			// Wait for the thread.
-			Kernel32.WaitForSingleObject(threadHandle, unchecked((uint)-1));
-
-			// Close the thread handle.
-			Kernel32.CloseHandle(threadHandle);*/
 		}
 
 		/// <summary>
@@ -748,20 +515,6 @@ namespace PaisleyPark.ViewModels
 		/// </summary>
 		private void LoadPreset()
 		{
-			// Ensure that our injection and newmem addresses are set.
-			/*if (_inject == 0 || _newmem == 0)
-			{
-				MessageBox.Show(
-					"Code is not injected for placing waymarks!",
-					"Paisley Park",
-					MessageBoxButton.OK,
-					MessageBoxImage.Error
-				);
-				logger.Error("Injection somehow failed yet wasn't caught by an earlier error. You should not see this!");
-				OnClose();
-				Application.Current.Shutdown();
-			}*/
-
 			if (!UserSettings.LocalOnly)
 			{
 				MessageBox.Show("This version of Paisley Park only supports Local Only mode.", "Paisley Park", MessageBoxButton.OK, MessageBoxImage.Exclamation);
@@ -889,12 +642,6 @@ namespace PaisleyPark.ViewModels
 		/// </summary>
 		private void OnClose()
 		{
-			// Deallocate memory before closing.
-			if (_inject != 0)
-				GameProcess.Dealloc(_inject);
-			if (_newmem != 0)
-				GameProcess.Dealloc(_newmem);
-
 			// Save the settings.
 			Settings.Save(UserSettings);
 
